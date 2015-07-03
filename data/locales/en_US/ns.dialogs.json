@@ -131,6 +131,8 @@
     "extensionsFolderPlaceholder": "file:///c:\\tagspaces-extensions",
     "calculateTag": "Calculate tags from the current search results",
     "calculateTagHelp": "Reduces the performance while browsing directories",
+    "tagMethod": "Store tags in files instead of filenames",
+    "tagMethodHelp": "Stores tags in a seperate file with name of original file plus '.tsf' extension. Name of original file remains unchanged",
     "tagDelimiter": "Tag delimiter (e.g. Filename[TAG1_TAG2], _ is the delimiter)",
     "prefixTagContainer": "Prefix for the tag container (e.g. in 'Filename_[TAG1].txt', '_' is the prefix)",
     "fileNameHelp": "File name should be at least one character long and should not contain the following characters: # / \\ : * ? \" < > |",

@@ -406,6 +406,10 @@ define(function(require, exports, module) {
     }
   };
 
+  var readFileSync = function(filePath) {
+    return fs.readFileSync(filePath, 'utf8');
+  };
+
   /* var loadEXIF = function(filePath) {
       console.log("Loading file: "+filePath);
 
@@ -549,7 +553,7 @@ define(function(require, exports, module) {
     }
   };
 
-  var deleteElement = function(path) {
+  var deleteElement = function(path, isTagFile) {
     console.log("Deleting: " + path);
 
     fs.unlink(path, function(error) {
@@ -557,7 +561,8 @@ define(function(require, exports, module) {
         console.log("Deleting file " + path + " failed " + error);
         return;
       }
-      TSPOSTIO.deleteElement(path);
+      if (!isTagFile)
+        TSPOSTIO.deleteElement(path);
     });
   };
 
@@ -709,6 +714,7 @@ define(function(require, exports, module) {
   exports.renameFile = renameFile;
   exports.copyFile = copyFile;
   exports.loadTextFile = loadTextFile;
+  exports.readFileSync = readFileSync;
   exports.saveTextFile = saveTextFile;
   exports.saveBinaryFile = saveBinaryFile;
   exports.listDirectory = listDirectory;

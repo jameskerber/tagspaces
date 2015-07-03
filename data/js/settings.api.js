@@ -527,6 +527,15 @@ define(function(require, exports, module) {
   var setCalculateTags = function(value) {
     exports.Settings.calculateTags = value;
   };
+  var getTagMethod = function() {
+    if (exports.Settings.tagMethod === undefined) {
+      exports.Settings.tagMethod = exports.DefaultSettings.tagMethod;
+    }
+    return exports.Settings.tagMethod;
+  };
+  var setTagMethod = function(value) {
+    exports.Settings.tagMethod = value;
+  }
   var getLoadLocationMeta = function() {
     if (exports.Settings.loadLocationMeta === undefined) {
       exports.Settings.loadLocationMeta = exports.DefaultSettings.loadLocationMeta;
@@ -922,6 +931,8 @@ define(function(require, exports, module) {
   exports.setWebDavPath = setWebDavPath;
   exports.getCalculateTags = getCalculateTags;
   exports.setCalculateTags = setCalculateTags;
+  exports.getTagMethod = getTagMethod;
+  exports.setTagMethod = setTagMethod;
   exports.getLoadLocationMeta = getLoadLocationMeta;
   exports.setLoadLocationMeta = setLoadLocationMeta;
   exports.getIsWindowMaximized = getIsWindowMaximized;

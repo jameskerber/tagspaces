@@ -1,6 +1,8 @@
 /* Copyright (c) 2012-2015 The Tagspaces Authors. All rights reserved.
  * Use of this source code is governed by a AGPL3 license that
- * can be found in the LICENSE file. */
+ * can be found in the LICENSE file. 
+ *
+ * TODO: Implement conversion between tag methods. */
 /* global define  */
 define(function(require, exports, module) {
   'use strict';
@@ -8,6 +10,7 @@ define(function(require, exports, module) {
   var TSCORE = require('tscore');
   var BEGIN_TAG_CONTAINER = '[';
   var END_TAG_CONTAINER = ']';
+  var TAG_FILE_EXTENSION = '.tags';
 
   function extractFileName(filePath) {
     return filePath.substring(filePath.lastIndexOf(TSCORE.dirSeparator) + 1, filePath.length);
@@ -30,6 +33,13 @@ define(function(require, exports, module) {
   function extractFileNameWithoutExt(filePath) {
     var fileName = extractFileName(filePath);
     var indexOfDot = fileName.lastIndexOf('.');
+    if (TSCORE.Config.getTagMethod()) {
+      if (indexOfDot > 0)
+        return fileName.substring(0, indexOfDot);
+      else
+        return fileName;
+    }
+
     var lastIndexBeginTagContainer = fileName.lastIndexOf(BEGIN_TAG_CONTAINER);
     var lastIndexEndTagContainer = fileName.lastIndexOf(END_TAG_CONTAINER);
     if (lastIndexBeginTagContainer === 0 && lastIndexEndTagContainer + 1 === fileName.length) {
@@ -93,6 +103,8 @@ define(function(require, exports, module) {
   function extractTitle(filePath) {
     console.log('Extracting title from: ' + filePath);
     var fileName = extractFileNameWithoutExt(filePath);
+    if (TSCORE.Config.getTagMethod())
+      return fileName;
     var beginTagContainer = fileName.indexOf(BEGIN_TAG_CONTAINER);
     var endTagContainer = fileName.lastIndexOf(END_TAG_CONTAINER);
     /* cases like "", "t", "[" 
@@ -240,18 +252,36 @@ define(function(require, exports, module) {
   }
 
   function extractTags(filePath) {
-    console.log('Extracting tags from: ' + filePath);
+    if (TSCORE.Config.getTagMethod())
+      console.log('Extracting tags from: ' + filePath + TAG_FILE_EXTENSION);
+    else
+      console.log('Extracting tags from: ' + filePath);
     var fileName = extractFileName(filePath);
     // WithoutExt
     var tags = [];
-    var beginTagContainer = fileName.indexOf(BEGIN_TAG_CONTAINER);
-    var endTagContainer = fileName.indexOf(END_TAG_CONTAINER);
+    if (TSCORE.Config.getTagMethod()) {
+      // Read tags from the tag file.
+      try {
+        tags = TSCORE.IO.readFileSync(filePath + TAG_FILE_EXTENSION);
+      } catch (err) {
+        // Throw again if error is not of type 'file-not-found'.
+        if (err.code !== 'ENOENT') throw err;
+
+        console.log('No tag file created yet. Aborting extraction.');
+        return [];        
+      }
+    } else {
+      // Get tags from filename.
+      tags = fileName;
+    }
+    var beginTagContainer = tags.indexOf(BEGIN_TAG_CONTAINER);
+    var endTagContainer = tags.indexOf(END_TAG_CONTAINER);
     if (beginTagContainer < 0 || endTagContainer < 0 || beginTagContainer >= endTagContainer) {
       console.log('Filename does not contains tags. Aborting extraction.');
-      return tags;
+      return [];
     }
     var cleanedTags = [];
-    var tagContainer = fileName.slice(beginTagContainer + 1, endTagContainer).trim();
+    var tagContainer = tags.slice(beginTagContainer + 1, endTagContainer).trim();
     tags = tagContainer.split(TSCORE.Config.getTagDelimiter());
     for (var i = 0; i < tags.length; i++) {
       // Min tag length set to 1 character
@@ -332,6 +362,22 @@ define(function(require, exports, module) {
     return newFileName;
   }
 
+  // Internal
+  function generateTagFileContents(tags){
+    var tagsString = '';
+    // Creating the string with all the tags by more than 0 tags
+    if (tags.length > 0) {
+      tagsString = BEGIN_TAG_CONTAINER;
+      for (var i = 0; i < tags.length; i++) {
+        tagsString += tags[i] + TSCORE.Config.getTagDelimiter();
+      }
+      tagsString = tagsString.trim();
+      tagsString += END_TAG_CONTAINER;
+    }
+    console.log('The tags string: ' + tagsString);
+    return tagsString;
+  };
+
   function writeTagsToFile(filePath, tags) {
     console.log('Add the tags to: ' + filePath);
     var fileName = extractFileName(filePath);
@@ -344,8 +390,13 @@ define(function(require, exports, module) {
         extractedTags.push(tags[i].trim());
       }
     }
-    var newFileName = generateFileName(fileName, extractedTags);
-    TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    if (TSCORE.Config.getTagMethod()) {
+      var newTagFileContent = generateTagFileContents(extractedTags);
+      TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
+    } else {
+      var newFileName = generateFileName(fileName, extractedTags);
+      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    }
     collectRecentTags(tags);
   }
 
@@ -362,19 +413,28 @@ define(function(require, exports, module) {
         extractedTags.splice(tagLoc, 1);
       }
     }
-    var newFileName = generateFileName(fileName, extractedTags);
-    TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    if (TSCORE.Config.getTagMethod()) {
+      var newTagFileContent = generateTagFileContents(extractedTags);
+      TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
+    } else {
+      var newFileName = generateFileName(fileName, extractedTags);
+      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    }
   }
 
   function cleanFileFromTags(filePath) {
     console.log('Cleaning file from tags: ' + filePath);
-    var fileTitle = extractTitle(filePath);
-    var fileExt = extractFileExtension(filePath);
-    var containingDirectoryPath = extractContainingDirectoryPath(filePath);
-    if (fileExt.length > 0) {
-      fileExt = '.' + fileExt;
+    if (TSCORE.Config.getTagMethod()) {
+      TSCORE.IO.deleteElement(filePath + TAG_FILE_EXTENSION, true);
+    } else {
+      var fileTitle = extractTitle(filePath);
+      var fileExt = extractFileExtension(filePath);
+      var containingDirectoryPath = extractContainingDirectoryPath(filePath);
+      if (fileExt.length > 0) {
+        fileExt = '.' + fileExt;
+      }
+      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt);
     }
-    TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt);
   }
 
   function cleanFilesFromTags(filePathArray) {
@@ -426,8 +486,13 @@ define(function(require, exports, module) {
         }
       }
     }
-    var newFileName = generateFileName(fileName, extractedTags);
-    TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    if (TSCORE.Config.getTagMethod()) {
+      var newTagFileContent = generateTagFileContents(extractedTags);
+      TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
+    } else {
+      var newFileName = generateFileName(fileName, extractedTags);
+      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    }
   }
 
   // Replaces a tag with a new one
@@ -442,8 +507,13 @@ define(function(require, exports, module) {
         extractedTags[i] = newTag.trim();
       }
     }
-    var newFileName = generateFileName(fileName, extractedTags);
-    TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    if (TSCORE.Config.getTagMethod()) {
+      var newTagFileContent = generateTagFileContents(extractedTags);
+      TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
+    } else {
+      var newFileName = generateFileName(fileName, extractedTags);
+      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    }
   }
 
   function changeTitle(filePath, newTitle) {
@@ -454,9 +524,15 @@ define(function(require, exports, module) {
     if (fileExt.length > 0) {
       fileExt = '.' + fileExt;
     }
-    // TODO generalize generateFileName to support fileTitle & fileExtension
-    var newFileName = generateFileName(newTitle, extractedTags);
-    TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName + fileExt);
+    if (TSCORE.Config.getTagMethod()) {
+      // Rename both the original and associated tag files.
+      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newTitle + fileExt);
+      TSCORE.IO.renameFile(filePath + TAG_FILE_EXTENSION, containingDirectoryPath + TSCORE.dirSeparator + newTitle + fileExt + TAG_FILE_EXTENSION);
+    } else {
+      // TODO generalize generateFileName to support fileTitle & fileExtension
+      var newFileName = generateFileName(newTitle, extractedTags);
+      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName + fileExt);
+    }
     return true;
   }
 
@@ -472,8 +548,13 @@ define(function(require, exports, module) {
         newTags.push(tags[i]);
       }
     }
-    var newFileName = generateFileName(fileName, newTags);
+    if (TSCORE.Config.getTagMethod()) {
+      var newTagFileContent = generateTagFileContents(newTags);
+      TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
+    } else {
+      var newFileName = generateFileName(fileName, newTags);
     TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+    }
   }
 
   //Collect recent tags in a custom tag-group
@@ -505,6 +586,7 @@ define(function(require, exports, module) {
   // Public API definitions
   exports.beginTagContainer = BEGIN_TAG_CONTAINER;
   exports.endTagContainer = END_TAG_CONTAINER;
+  exports.tagFileExtension = TAG_FILE_EXTENSION;
   exports.extractFileName = extractFileName;
   exports.extractFileNameWithoutExt = extractFileNameWithoutExt;
   exports.extractContainingDirectoryPath = extractContainingDirectoryPath;

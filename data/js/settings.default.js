@@ -23,6 +23,7 @@ define(function (require, exports, module) {
         "prefixTagContainer":       "",
         "tagDelimiter":             " ",
         "calculateTags":            false,
+        "tagMethod":                false,
         "loadLocationMeta":         false,
         "warnIncludeSubdirs":       true,
         "isWindowMaximized":        false,

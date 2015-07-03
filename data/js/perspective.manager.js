@@ -180,37 +180,39 @@ define(function(require, exports, module) {
     for (var i = 0; i < dirList.length; i++) {
       // Considering Unix HiddenEntries (. in the beginning of the filename)
       if (TSCORE.Config.getShowUnixHiddenEntries() || !TSCORE.Config.getShowUnixHiddenEntries() && dirList[i].path.indexOf(TSCORE.dirSeparator + '.') < 0) {
-        filename = dirList[i].name.replace(/(<([^>]+)>)/gi, ''); // sanitizing filename
-        path = dirList[i].path.replace(/(<([^>]+)>)/gi, ''); // sanitizing filepath
-        title = TSCORE.TagUtils.extractTitle(path);
+        if (TSCORE.Config.getTagMethod() && (dirList[i].path.indexOf(TSCORE.TagUtils.tagFileExtension) < 0)) {
+          filename = dirList[i].name.replace(/(<([^>]+)>)/gi, ''); // sanitizing filename
+          path = dirList[i].path.replace(/(<([^>]+)>)/gi, ''); // sanitizing filepath
+          title = TSCORE.TagUtils.extractTitle(path);
 
-        if (dirList[i].isFile) {
-          ext = TSCORE.TagUtils.extractFileExtension(path);
-          tags = TSCORE.TagUtils.extractTags(path);
-          fileSize = dirList[i].size;
-          fileLMDT = dirList[i].lmdt;
-          if (fileSize === undefined) {
-            fileSize = '';
+          if (dirList[i].isFile) {
+            ext = TSCORE.TagUtils.extractFileExtension(path);
+            tags = TSCORE.TagUtils.extractTags(path);
+            fileSize = dirList[i].size;
+            fileLMDT = dirList[i].lmdt;
+            if (fileSize === undefined) {
+              fileSize = '';
+            }
+            if (fileLMDT === undefined) {
+              fileLMDT = '';
+            }
+            entry = [
+              ext,
+              title,
+              tags,
+              fileSize,
+              fileLMDT,
+              path,
+              filename
+            ];
+            TSCORE.fileList.push(entry);
+          } else {
+            entry = [
+              path,
+              filename
+            ];
+            TSCORE.subDirsList.push(entry);
           }
-          if (fileLMDT === undefined) {
-            fileLMDT = '';
-          }
-          entry = [
-            ext,
-            title,
-            tags,
-            fileSize,
-            fileLMDT,
-            path,
-            filename
-          ];
-          TSCORE.fileList.push(entry);
-        } else {
-          entry = [
-            path,
-            filename
-          ];
-          TSCORE.subDirsList.push(entry);
         }
       }
     }
