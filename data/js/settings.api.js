@@ -527,14 +527,17 @@ define(function(require, exports, module) {
   var setCalculateTags = function(value) {
     exports.Settings.calculateTags = value;
   };
-  var getTagMethod = function() {
-    if (exports.Settings.tagMethod === undefined) {
-      exports.Settings.tagMethod = exports.DefaultSettings.tagMethod;
+  var getSelectedTagMethod = function() {
+    if (exports.Settings.selectedTagMethod === undefined) {
+      exports.Settings.selectedTagMethod = exports.DefaultSettings.selectedTagMethod;
     }
-    return exports.Settings.tagMethod;
+    return exports.Settings.selectedTagMethod;
   };
-  var setTagMethod = function(value) {
-    exports.Settings.tagMethod = value;
+  var setSelectedTagMethod = function(value) {
+    exports.Settings.selectedTagMethod = value;
+  }
+  var getTagMethods = function() {
+    return exports.DefaultSettings.tagMethods;
   }
   var getLoadLocationMeta = function() {
     if (exports.Settings.loadLocationMeta === undefined) {
@@ -931,8 +934,9 @@ define(function(require, exports, module) {
   exports.setWebDavPath = setWebDavPath;
   exports.getCalculateTags = getCalculateTags;
   exports.setCalculateTags = setCalculateTags;
-  exports.getTagMethod = getTagMethod;
-  exports.setTagMethod = setTagMethod;
+  exports.getSelectedTagMethod = getSelectedTagMethod;
+  exports.setSelectedTagMethod = setSelectedTagMethod;
+  exports.getTagMethods = getTagMethods;
   exports.getLoadLocationMeta = getLoadLocationMeta;
   exports.setLoadLocationMeta = setLoadLocationMeta;
   exports.getIsWindowMaximized = getIsWindowMaximized;

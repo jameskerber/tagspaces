@@ -85,7 +85,6 @@ define(function(require, exports, module) {
     $('#showMainMenuCheckbox').attr('checked', TSCORE.Config.getShowMainMenu());
     $('#checkforUpdatesCheckbox').attr('checked', TSCORE.Config.getCheckForUpdates());
     $('#calculateTagsCheckbox').attr('checked', TSCORE.Config.getCalculateTags());
-    $('#tagMethodCheckbox').attr('checked', TSCORE.Config.getTagMethod());
     $('#loadLocationMetaData').attr('checked', TSCORE.Config.getLoadLocationMeta());
     $('#tagsDelimiterInput').val(TSCORE.Config.getTagDelimiter());
     $('#prefixTagContainerInput').val(TSCORE.Config.getPrefixTagContainer());
@@ -98,6 +97,15 @@ define(function(require, exports, module) {
     $('#saveDocumentKeyBinding').val(TSCORE.Config.getSaveDocumentKeyBinding());
     $('#documentPropertiesKeyBinding').val(TSCORE.Config.getPropertiesDocumentKeyBinding());
     $('#perspectiveList').empty();
+    var $tagMethodDropdown = $('#tagMethodList'); //.attr('checked', TSCORE.Config.getTagMethod());
+    $tagMethodDropdown.empty();
+    TSCORE.Config.getTagMethods().forEach(function(value) {
+      if (TSCORE.Config.getSelectedTagMethod() === value.id) {
+        $tagMethodDropdown.append($('<option>').attr('selected', 'selected').text(value.title).val(value.id));
+      } else {
+        $tagMethodDropdown.append($('<option>').text(value.title).val(value.id));
+      }
+    });
     TSCORE.Config.getPerspectives().forEach(function(value) {
       addPerspective($('#perspectiveList'), value.id);
     });
@@ -143,7 +151,7 @@ define(function(require, exports, module) {
     TSCORE.Config.setShowMainMenu($('#showMainMenuCheckbox').is(':checked'));
     TSCORE.Config.setCheckForUpdates($('#checkforUpdatesCheckbox').is(':checked'));
     TSCORE.Config.setCalculateTags($('#calculateTagsCheckbox').is(':checked'));
-    TSCORE.Config.setTagMethod($('#tagMethodCheckbox').is(':checked'));
+    TSCORE.Config.setSelectedTagMethod($('#tagMethodList').val());
     TSCORE.Config.setTagDelimiter($('#tagsDelimiterInput').val());
     TSCORE.Config.setPrefixTagContainer($('#prefixTagContainerInput').val());
     TSCORE.Config.setLoadLocationMeta($('#loadLocationMetaData').is(':checked'));

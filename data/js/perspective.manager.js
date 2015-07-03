@@ -180,7 +180,8 @@ define(function(require, exports, module) {
     for (var i = 0; i < dirList.length; i++) {
       // Considering Unix HiddenEntries (. in the beginning of the filename)
       if (TSCORE.Config.getShowUnixHiddenEntries() || !TSCORE.Config.getShowUnixHiddenEntries() && dirList[i].path.indexOf(TSCORE.dirSeparator + '.') < 0) {
-        if (TSCORE.Config.getTagMethod() && (dirList[i].path.lastIndexOf(TSCORE.TagUtils.tagFileExtension) < 0)) {
+        if (TSCORE.Config.getSelectedTagMethod() === "0" || (TSCORE.Config.getSelectedTagMethod() === "1" 
+              && (dirList[i].path.lastIndexOf(TSCORE.TagUtils.tagFileExtension) < 0))) {
           filename = dirList[i].name.replace(/(<([^>]+)>)/gi, ''); // sanitizing filename
           path = dirList[i].path.replace(/(<([^>]+)>)/gi, ''); // sanitizing filepath
           title = TSCORE.TagUtils.extractTitle(path);

@@ -23,7 +23,6 @@ define(function (require, exports, module) {
         "prefixTagContainer":       "",
         "tagDelimiter":             " ",
         "calculateTags":            false,
-        "tagMethod":                false,
         "loadLocationMeta":         false,
         "warnIncludeSubdirs":       true,
         "isWindowMaximized":        false,
@@ -34,6 +33,12 @@ define(function (require, exports, module) {
         "ootbViewers":              [ "viewerBrowser", "viewerMD", "viewerImage", "viewerPDF", "editorText", "viewerText", "editorODF", "viewerURL", "viewerHTML", "viewerMHTML", "editorJSON", "viewerZIP" ],
         "ootbEditors":              [ "editorHTML", "editorText", "editorODF", "editorJSON" ],
         "perspectives":             [{ 'id': 'perspectiveList' }, { 'id': 'perspectiveGrid' }, { 'id': 'perspectiveGraph' }],
+        "selectedTagMethod":        "Filename",
+        "tagMethods":               [
+            { "id": "0", "title": "Filename" },
+            { "id": "1", "title": "Seperate file" },
+            { "id": "2", "title": "Database" }
+        ],
         "interfaceLanguage": "en_US",
         "supportedLanguages": [
             { "iso": "en_US", "title": "English" },
