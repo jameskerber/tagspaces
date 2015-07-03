@@ -553,7 +553,7 @@ define(function(require, exports, module) {
     }
   };
 
-  var deleteElement = function(path, isTagFile) {
+  var deleteElement = function(path, silentMode) {
     console.log("Deleting: " + path);
 
     fs.unlink(path, function(error) {
@@ -561,7 +561,7 @@ define(function(require, exports, module) {
         console.log("Deleting file " + path + " failed " + error);
         return;
       }
-      if (!isTagFile)
+      if (!silentMode)
         TSPOSTIO.deleteElement(path);
     });
   };
