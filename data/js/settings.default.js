@@ -34,6 +34,7 @@ define(function (require, exports, module) {
         "ootbEditors":              [ "editorHTML", "editorText", "editorODF", "editorJSON" ],
         "perspectives":             [{ 'id': 'perspectiveList' }, { 'id': 'perspectiveGrid' }, { 'id': 'perspectiveGraph' }],
         "selectedTagMethod":        "Filename",
+        "tagMethodEnabled":         false,
         "tagMethods":               [
             { "id": "0", "title": "Filename" },
             { "id": "1", "title": "Seperate file" },

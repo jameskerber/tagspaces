@@ -77,6 +77,18 @@ define(function(require, exports, module) {
       saveAs(blob, 'tsm[' + TSCORE.TagUtils.formatDateTime4Tag(new Date(), true) + '].json');
       console.log('Group Data Saved...');
     });
+    if (TSCORE.Config.getTagMethodEnabled()) {
+      $('#tagMethodTab').show();
+    } else {
+      $('#tagMethodTab').hide();
+    }
+    $('#tagMethodEnabledCheckbox').click(function() {
+      $('#tagMethodTab').toggle();
+      if ($(this).is(':checked'))
+        TSCORE.Config.setTagMethodEnabled(true);
+      else
+        TSCORE.Config.setTagMethodEnabled(false);
+    });
   }
 
   function reInitUI() {
@@ -97,7 +109,8 @@ define(function(require, exports, module) {
     $('#saveDocumentKeyBinding').val(TSCORE.Config.getSaveDocumentKeyBinding());
     $('#documentPropertiesKeyBinding').val(TSCORE.Config.getPropertiesDocumentKeyBinding());
     $('#perspectiveList').empty();
-    var $tagMethodDropdown = $('#tagMethodList'); //.attr('checked', TSCORE.Config.getTagMethod());
+    $('#tagMethodEnabledCheckbox').attr('checked', TSCORE.Config.getTagMethodEnabled());
+    var $tagMethodDropdown = $('#tagMethodList');
     $tagMethodDropdown.empty();
     TSCORE.Config.getTagMethods().forEach(function(value) {
       if (TSCORE.Config.getSelectedTagMethod() === value.id) {
@@ -151,6 +164,7 @@ define(function(require, exports, module) {
     TSCORE.Config.setShowMainMenu($('#showMainMenuCheckbox').is(':checked'));
     TSCORE.Config.setCheckForUpdates($('#checkforUpdatesCheckbox').is(':checked'));
     TSCORE.Config.setCalculateTags($('#calculateTagsCheckbox').is(':checked'));
+    TSCORE.Config.setTagMethodEnabled($('#tagMethodList').val());
     TSCORE.Config.setSelectedTagMethod($('#tagMethodList').val());
     TSCORE.Config.setTagDelimiter($('#tagsDelimiterInput').val());
     TSCORE.Config.setPrefixTagContainer($('#prefixTagContainerInput').val());

@@ -12,6 +12,7 @@
                     <li><a href="#filetypes" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:fileTypeTab">File Types</a></li>
                     <li><a href="#keyBindings" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:keyBindingsTab">Key Bindings</a></li>
                     <li><a href="#experimental" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:experimentalTab">Experimental*</a></li>
+                    <li><a href="#tagMethodContainer" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:tagMethodTab" id = 'tagMethodTab'>Tag Method</a></li>
                 </ul>
             </div>
             <div class="modal-body form" style="height: 380px;" id="optionsAccordion">
@@ -97,7 +98,7 @@
                                 <div class="col-sm-7">
                                     <input type='text' class='form-control' id='reloadDocumentKeyBinding' placeholder='ctrl+r | command+r'/>
                                 </div>
-                            </div>
+                            </div>KeyBinding
                             <div class='form-group'>
                                 <label class="col-sm-4 control-label" data-i18n="ns.dialogs:closeDocumentKeyBinding">Close Document</label>
                                 <div class="col-sm-7">
@@ -131,7 +132,7 @@
                             <div class='form-group'>
                                 <label class="col-sm-4 control-label" data-i18n="ns.dialogs:editDocumentKeyBinding">Edit Document</label>
                                 <div class="col-sm-7">
-                                    <input type='text' class='form-control' id='editDocumentKeyBinding' placeholder='ctrl+e | command+e'/>
+                                    <input type='text' class='form-control' id='editDocumentKeyBinding' placeholdeKeyBindingr='ctrl+e | command+e'/>
                                 </div>
                             </div>
                             <div class='form-group'>
@@ -186,11 +187,21 @@
                                 <p class="help-block" data-i18n="ns.dialogs:calculateTagHelp">Reduces the performance while browsing directories</p>
                             </div>
                         </div>
-						<div class='form-group col-sm-12'>
-                            <label for='tagMethodList' data-i18n="ns.dialogs:tagMethod"></label>
-                            <select class='form-control' id='tagMethodList'></select>
-							<p class="help-block" data-i18n="ns.dialogs:tagMethodHelp"></p>
-						</div>
+                        <div class='form-group'>
+                            <div class="col-sm-2">
+                                <div class="onoffswitch">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="tagMethodEnabledCheckbox" checked>
+                                    <label class="onoffswitch-label" for="tagMethodEnabledCheckbox">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-sm-10" style="margin-top: 0;">
+                                <span data-i18n="ns.dialogs:tagMethodEnabled"></span>
+                                <p class="help-block" data-i18n="ns.dialogs:tagMethodEnabledHelp"></p>
+                            </div>
+                        </div>
                         <div class="alert alert-danger col-sm-11" role="alert" data-i18n="ns.dialogs:experimentalHelp">Be carefull changing the following settings.</div>
                         <div class='form-group col-sm-12'>
                             <label for='tagsDelimiterInput' data-i18n="ns.dialogs:tagDelimiter">Tag delimiter (e.g. Filename[TAG1_TAG2], _ is the delimiter)</label>
@@ -203,6 +214,14 @@
                         <div class='form-group col-sm-12'>
                             <label for='extensionsPathInput' data-i18n="ns.dialogs:extensionsFolder">Extensions folder (default value is "ext")</label>
                             <input type='text' class='form-control' id='extensionsPathInput' data-i18n="[placeholder]ns.dialogs:extensionsFolderPlaceholder"/>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tagMethodContainer" style="height: 360px; overflow-y: auto;">
+                        <div class='form-group col-sm-12'>
+                            <label for='tagMethodList' data-i18n="ns.dialogs:tagMethod"></label>
+                            <select class='form-control' id='tagMethodList'></select>
+                            <p class="help-block" data-i18n="ns.dialogs:tagMethodHelp"></p>
                         </div>
                     </div>
                 </div>

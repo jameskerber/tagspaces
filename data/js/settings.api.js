@@ -527,6 +527,15 @@ define(function(require, exports, module) {
   var setCalculateTags = function(value) {
     exports.Settings.calculateTags = value;
   };
+  var getTagMethodEnabled = function() {
+    if (exports.Settings.tagMethodEnabled === undefined) {
+      exports.Settings.tagMethodEnabled = exports.DefaultSettings.tagMethodEnabled;
+    }
+    return exports.Settings.tagMethodEnabled;
+  };
+  var setTagMethodEnabled = function(value) {
+    exports.Settings.tagMethodEnabled = value;
+  }
   var getSelectedTagMethod = function() {
     if (exports.Settings.selectedTagMethod === undefined) {
       exports.Settings.selectedTagMethod = exports.DefaultSettings.selectedTagMethod;
@@ -934,6 +943,8 @@ define(function(require, exports, module) {
   exports.setWebDavPath = setWebDavPath;
   exports.getCalculateTags = getCalculateTags;
   exports.setCalculateTags = setCalculateTags;
+  exports.getTagMethodEnabled = getTagMethodEnabled;
+  exports.setTagMethodEnabled = setTagMethodEnabled;
   exports.getSelectedTagMethod = getSelectedTagMethod;
   exports.setSelectedTagMethod = setSelectedTagMethod;
   exports.getTagMethods = getTagMethods;
