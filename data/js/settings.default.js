@@ -33,7 +33,7 @@ define(function (require, exports, module) {
         "ootbViewers":              [ "viewerBrowser", "viewerMD", "viewerImage", "viewerPDF", "editorText", "viewerText", "editorODF", "viewerURL", "viewerHTML", "viewerMHTML", "editorJSON", "viewerZIP" ],
         "ootbEditors":              [ "editorHTML", "editorText", "editorODF", "editorJSON" ],
         "perspectives":             [{ 'id': 'perspectiveList' }, { 'id': 'perspectiveGrid' }, { 'id': 'perspectiveGraph' }],
-        "selectedTagMethod":        "Filename",
+        "defaultTagMethod":        "Filename",
         "tagMethodEnabled":         false,
         "tagMethods":               [
             { "id": "0", "title": "Filename" },

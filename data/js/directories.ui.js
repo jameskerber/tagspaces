@@ -356,8 +356,10 @@ define(function(require, exports, module) {
     }
     console.log('Dir History: ' + JSON.stringify(directoryHistory));
     TSCORE.currentPath = directoryPath;
-    if (TSPRO.available && TSCORE.IO.getDirectoryMetaInformation) {
-      TSCORE.IO.getDirectoryMetaInformation(TSPRO.getMetaDirectoryPath());
+    if (TSCORE.IO.getDirectoryMetaInformation) {
+      //TODO: get folder name
+      var metaFolderPath = TSCORE.currentPath + TSCORE.dirSeparator + ".ts";
+      TSCORE.IO.getDirectoryMetaInformation(metaFolderPath);
     }
     TSCORE.IO.listDirectory(directoryPath);
   }
@@ -397,7 +399,12 @@ define(function(require, exports, module) {
 
   function createLocation() {
     var locationPath = $('#folderLocation').val();
-    TSCORE.Config.createLocation($('#connectionName').val(), locationPath, $('#locationPerspective').val());
+    if (TSCORE.Config.getTagMethodEnabled()) {
+      var $tagMethod2 = $('#tagMethodList2');
+      TSCORE.Config.createLocation($('#connectionName').val(), locationPath, $('#locationPerspective').val(), $tagMethod2.val());
+    } else {
+      TSCORE.Config.createLocation($('#connectionName').val(), locationPath, $('#locationPerspective').val());
+    }
     // Enable the UI behavior by not empty location list
     $('#createNewLocation').attr('title', $.i18n.t('ns.common:connectNewLocationTooltip')).tooltip('destroy');
     $('#locationName').prop('disabled', false);
@@ -409,7 +416,12 @@ define(function(require, exports, module) {
   function editLocation() {
     var $connectionName2 = $('#connectionName2');
     var $folderLocation2 = $('#folderLocation2');
-    TSCORE.Config.editLocation($connectionName2.attr('oldName'), $connectionName2.val(), $folderLocation2.val(), $('#locationPerspective2').val());
+    if (TSCORE.Config.getTagMethodEnabled()) {
+      var $tagMethod1 = $('#tagMethodList1');
+      TSCORE.Config.editLocation($connectionName2.attr('oldName'), $connectionName2.val(), $folderLocation2.val(), $('#locationPerspective2').val(), $tagMethod1.val());
+    } else {
+      TSCORE.Config.editLocation($connectionName2.attr('oldName'), $connectionName2.val(), $folderLocation2.val(), $('#locationPerspective2').val());
+    }
     initLocations();
     openLocation($folderLocation2.val());
   }
@@ -452,6 +464,24 @@ define(function(require, exports, module) {
           $locationPerspective2.append($('<option>').text(value.id).val(value.id));
         }
       });
+      if (TSCORE.Config.getTagMethodEnabled()) {
+        $('#tagMethodOption1').show();
+        var $tagMethodDropdown = $('#tagMethodList1');
+        var selectedTagMethod = TSCORE.Config.getLocation(path).tagMethod;
+        $tagMethodDropdown.empty();
+        TSCORE.Config.getTagMethods().forEach(function(value) {
+          if (selectedTagMethod === 'undefined') {
+            selectedTagMethod = TSCORE.Config.getDefaultTagMethod();
+          }
+          if (selectedTagMethod === value.id) {
+            $tagMethodDropdown.append($('<option>').attr('selected', 'selected').text(value.title).val(value.id));
+          } else {
+            $tagMethodDropdown.append($('<option>').text(value.title).val(value.id));
+          }
+        });
+      } else {
+        $('#tagMethodOption1').hide();
+      }
       $connectionName2.val(name);
       $connectionName2.attr('oldName', name);
       $folderLocation2.val(path);
@@ -502,6 +532,20 @@ define(function(require, exports, module) {
         $('#createFolderConnectionButton').on('click', function() {
           createLocation();
         });
+      }
+      if (TSCORE.Config.getTagMethodEnabled()) {
+        $('#tagMethodOption2').show();
+        var $tagMethodDropdown = $('#tagMethodList2');
+        $tagMethodDropdown.empty();
+        TSCORE.Config.getTagMethods().forEach(function(value) {
+          if (TSCORE.Config.getDefaultTagMethod() === value.id) {
+            $tagMethodDropdown.append($('<option>').attr('selected', 'selected').text(value.title).val(value.id));
+          } else {
+            $tagMethodDropdown.append($('<option>').text(value.title).val(value.id));
+          }
+        });
+      } else {
+        $('#tagMethodOption2').hide();
       }
       $('#connectionName').val('');
       $('#folderLocation').val('');

@@ -29,7 +29,8 @@ define(function(require, exports, module) {
   var locationTemplate = {
     'name': undefined,
     'path': undefined,
-    'perspective': undefined
+    'perspective': undefined,
+    'tagMethod': undefined
   };
   var tagGroupTemplate = {
     'title': undefined,
@@ -536,14 +537,14 @@ define(function(require, exports, module) {
   var setTagMethodEnabled = function(value) {
     exports.Settings.tagMethodEnabled = value;
   }
-  var getSelectedTagMethod = function() {
-    if (exports.Settings.selectedTagMethod === undefined) {
-      exports.Settings.selectedTagMethod = exports.DefaultSettings.selectedTagMethod;
+  var getDefaultTagMethod = function() {
+    if (exports.Settings.defaultTagMethod === undefined) {
+      exports.Settings.defaultTagMethod = exports.DefaultSettings.defaultTagMethod;
     }
-    return exports.Settings.selectedTagMethod;
+    return exports.Settings.defaultTagMethod;
   };
-  var setSelectedTagMethod = function(value) {
-    exports.Settings.selectedTagMethod = value;
+  var setDefaultTagMethod = function(value) {
+    exports.Settings.defaultTagMethod = value;
   }
   var getTagMethods = function() {
     return exports.DefaultSettings.tagMethods;
@@ -778,7 +779,7 @@ define(function(require, exports, module) {
     exports.Settings.tagGroups[targetPosition] = tmpTagGroup;
     saveSettings();
   };
-  var createLocation = function(name, location, perspectiveId) {
+  var createLocation = function(name, location, perspectiveId, tagMethod) {
     var newLocationModel = JSON.parse(JSON.stringify(locationTemplate));
     name = name.replace('\\', '\\\\');
     name = name.replace('\\\\\\', '\\\\');
@@ -786,6 +787,7 @@ define(function(require, exports, module) {
     newLocationModel.name = name;
     newLocationModel.path = location;
     newLocationModel.perspective = perspectiveId;
+    newLocationModel.tagMethod = tagMethod;
     var createLoc = true;
     exports.Settings.tagspacesList.forEach(function(value) {
       if (value.path === newLocationModel.path) {
@@ -802,7 +804,7 @@ define(function(require, exports, module) {
       saveSettings();
     }
   };
-  var editLocation = function(oldName, newName, newLocation, perspectiveId) {
+  var editLocation = function(oldName, newName, newLocation, perspectiveId, tagMethod) {
     //        name = name.replace("\\", "\\\\");
     //        name = name.replace("\\\\\\", "\\\\");
     //        name = name.replace("\\\\\\\\", "\\\\");   
@@ -824,6 +826,7 @@ define(function(require, exports, module) {
           value.name = newName;
           value.path = newLocation;
           value.perspective = perspectiveId;
+          value.tagMethod = tagMethod;
         }
       });
       saveSettings();
@@ -832,7 +835,7 @@ define(function(require, exports, module) {
   var getLocation = function(path) {
     var location;
     exports.Settings.tagspacesList.forEach(function(value) {
-      if (value.path === path) {
+      if (path.indexOf(value.path) > -1) {
         location = value;
       }
     });
@@ -945,8 +948,8 @@ define(function(require, exports, module) {
   exports.setCalculateTags = setCalculateTags;
   exports.getTagMethodEnabled = getTagMethodEnabled;
   exports.setTagMethodEnabled = setTagMethodEnabled;
-  exports.getSelectedTagMethod = getSelectedTagMethod;
-  exports.setSelectedTagMethod = setSelectedTagMethod;
+  exports.getDefaultTagMethod = getDefaultTagMethod;
+  exports.setDefaultTagMethod = setDefaultTagMethod;
   exports.getTagMethods = getTagMethods;
   exports.getLoadLocationMeta = getLoadLocationMeta;
   exports.setLoadLocationMeta = setLoadLocationMeta;

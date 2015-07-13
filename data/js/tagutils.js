@@ -33,7 +33,7 @@ define(function(require, exports, module) {
   function extractFileNameWithoutExt(filePath) {
     var fileName = extractFileName(filePath);
     var indexOfDot = fileName.lastIndexOf('.');
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       if (indexOfDot > 0)
         return fileName.substring(0, indexOfDot);
       else
@@ -103,7 +103,7 @@ define(function(require, exports, module) {
   function extractTitle(filePath) {
     console.log('Extracting title from: ' + filePath);
     var fileName = extractFileNameWithoutExt(filePath);
-    if (TSCORE.Config.getSelectedTagMethod() === "1")
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1")
       return fileName;
     var beginTagContainer = fileName.indexOf(BEGIN_TAG_CONTAINER);
     var endTagContainer = fileName.lastIndexOf(END_TAG_CONTAINER);
@@ -252,14 +252,14 @@ define(function(require, exports, module) {
   }
 
   function extractTags(filePath) {
-    if (TSCORE.Config.getSelectedTagMethod() === "1")
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1")
       console.log('Extracting tags from: ' + filePath + TAG_FILE_EXTENSION);
     else
       console.log('Extracting tags from: ' + filePath);
     var fileName = extractFileName(filePath);
     // WithoutExt
     var tags = [];
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       // Read tags from the tag file.
       try {
         tags = TSCORE.IO.readFileSync(filePath + TAG_FILE_EXTENSION);
@@ -390,7 +390,7 @@ define(function(require, exports, module) {
         extractedTags.push(tags[i].trim());
       }
     }
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       var newTagFileContent = generateTagFileContents(extractedTags);
       TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
     } else {
@@ -413,7 +413,7 @@ define(function(require, exports, module) {
         extractedTags.splice(tagLoc, 1);
       }
     }
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       var newTagFileContent = generateTagFileContents(extractedTags);
       TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
     } else {
@@ -424,7 +424,7 @@ define(function(require, exports, module) {
 
   function cleanFileFromTags(filePath) {
     console.log('Cleaning file from tags: ' + filePath);
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       TSCORE.IO.deleteElement(filePath + TAG_FILE_EXTENSION, true);
     } else {
       var fileTitle = extractTitle(filePath);
@@ -486,7 +486,7 @@ define(function(require, exports, module) {
         }
       }
     }
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       var newTagFileContent = generateTagFileContents(extractedTags);
       TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
     } else {
@@ -507,7 +507,7 @@ define(function(require, exports, module) {
         extractedTags[i] = newTag.trim();
       }
     }
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       var newTagFileContent = generateTagFileContents(extractedTags);
       TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
     } else {
@@ -524,7 +524,7 @@ define(function(require, exports, module) {
     if (fileExt.length > 0) {
       fileExt = '.' + fileExt;
     }
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       // Rename both the original and associated tag files.
       TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newTitle + fileExt);
       TSCORE.IO.renameFile(filePath + TAG_FILE_EXTENSION, containingDirectoryPath + TSCORE.dirSeparator + newTitle + fileExt + TAG_FILE_EXTENSION);
@@ -548,7 +548,7 @@ define(function(require, exports, module) {
         newTags.push(tags[i]);
       }
     }
-    if (TSCORE.Config.getSelectedTagMethod() === "1") {
+    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
       var newTagFileContent = generateTagFileContents(newTags);
       TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
     } else {

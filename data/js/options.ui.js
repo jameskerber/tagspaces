@@ -113,7 +113,7 @@ define(function(require, exports, module) {
     var $tagMethodDropdown = $('#tagMethodList');
     $tagMethodDropdown.empty();
     TSCORE.Config.getTagMethods().forEach(function(value) {
-      if (TSCORE.Config.getSelectedTagMethod() === value.id) {
+      if (TSCORE.Config.getDefaultTagMethod() === value.id) {
         $tagMethodDropdown.append($('<option>').attr('selected', 'selected').text(value.title).val(value.id));
       } else {
         $tagMethodDropdown.append($('<option>').text(value.title).val(value.id));
@@ -164,8 +164,8 @@ define(function(require, exports, module) {
     TSCORE.Config.setShowMainMenu($('#showMainMenuCheckbox').is(':checked'));
     TSCORE.Config.setCheckForUpdates($('#checkforUpdatesCheckbox').is(':checked'));
     TSCORE.Config.setCalculateTags($('#calculateTagsCheckbox').is(':checked'));
-    TSCORE.Config.setTagMethodEnabled($('#tagMethodList').val());
-    TSCORE.Config.setSelectedTagMethod($('#tagMethodList').val());
+    TSCORE.Config.setTagMethodEnabled($('#tagMethodEnabledCheckbox').is(':checked'));
+    TSCORE.Config.setDefaultTagMethod($('#tagMethodList').val());
     TSCORE.Config.setTagDelimiter($('#tagsDelimiterInput').val());
     TSCORE.Config.setPrefixTagContainer($('#prefixTagContainerInput').val());
     TSCORE.Config.setLoadLocationMeta($('#loadLocationMetaData').is(':checked'));
