@@ -406,6 +406,27 @@ define(function(require, exports, module) {
     }
   };
 
+  var readDatabase = function(databasePath, id) {
+    // Try fetching the document 
+    // TODO: Add method for fetching from the database (use synchronous read).
+    return {'_id': id, 'tags': '[]'};
+  }
+
+  var writeDatabase = function(databasePath, document) {
+    // Update any existing documents.
+    // TODO: Add method for writing to the database (asynchronous/synchronous write are both fine here).
+  }
+
+  var clearDatabaseEntry = function(databasePath, id) {
+    // Removes an entry in the database.
+    // TODO: Add method to clear specified entries in the database.
+  }
+
+  var changeDatabaseEntryId = function(databasePath, oldId, newId) {
+    // Changes the ID of an existing entry.
+    // TODO: Implement ID renaming of database entries.
+  }
+
   var readFileSync = function(filePath) {
     return fs.readFileSync(filePath, 'utf8');
   };
@@ -715,6 +736,10 @@ define(function(require, exports, module) {
   exports.copyFile = copyFile;
   exports.loadTextFile = loadTextFile;
   exports.readFileSync = readFileSync;
+  exports.readDatabase = readDatabase;
+  exports.writeDatabase = writeDatabase;
+  exports.clearDatabaseEntry = clearDatabaseEntry;
+  exports.changeDatabaseEntryId = changeDatabaseEntryId;
   exports.saveTextFile = saveTextFile;
   exports.saveBinaryFile = saveBinaryFile;
   exports.listDirectory = listDirectory;
