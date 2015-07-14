@@ -106,6 +106,7 @@
     "exportInstructions1": "Enter the command for executing your email client from the terminal in compose mode.",
     "exportInstructions2": "Also add the argument for adding attachments.",
     "emailClientCommand": "Email client",
+    "emailFileTooLargeError": "Combined file size (__size__) is too large for sending via email. Try removing some files from the selection, or use another method for transfer.",
     "attachmentArg": "Attachment argument",
     "attachmentSep": "Attachment separator",
     "fileExtension": "File Ext.",

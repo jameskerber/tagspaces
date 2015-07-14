@@ -268,7 +268,7 @@ define(function(require, exports, module) {
     TSPOSTIO.createDirectoryTree(directoyTree);
   };
 
-  var createDirectory = function(dirPath, silentMode) {
+  var createDirectory = function(dirPath, silentMode, overWrite) {
     console.log("Creating directory: " + dirPath);
 
     fs.mkdir(dirPath, function(error) {
@@ -278,70 +278,87 @@ define(function(require, exports, module) {
       }
       if (silentMode !== true) {
         TSPOSTIO.createDirectory(dirPath);
+      } else {
+        TSCORE.hideWaitingDialog();
       }
     });
   };
 
-  var copyFile = function(sourceFilePath, targetFilePath) {
+  var copyFile = function(sourceFilePath, targetFilePath, silentMode) {
     console.log("Copy file: " + sourceFilePath + " to " + targetFilePath);
 
     if (sourceFilePath.toLowerCase() === targetFilePath.toLowerCase()) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileTheSame"), $.i18n.t("ns.common:fileNotCopyied"));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileTheSame"), $.i18n.t("ns.common:fileNotCopyied"));
       return false;
     }
     if (fs.lstatSync(sourceFilePath).isDirectory()) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileIsDirectory", { fileName:sourceFilePath }));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileIsDirectory", { fileName:sourceFilePath }));
       return false;
     }
     if (fs.existsSync(targetFilePath)) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileExists", { fileName:targetFilePath }),  $.i18n.t("ns.common:fileRenameFailed"));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileExists", { fileName:targetFilePath }),  $.i18n.t("ns.common:fileRenameFailed"));
       return false;
     }
 
     var rd = fs.createReadStream(sourceFilePath);
     rd.on("error", function(err) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
     });
     var wr = fs.createWriteStream(targetFilePath);
     wr.on("error", function(err) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
     });
     wr.on("close", function(ex) {
-      TSPOSTIO.copyFile(sourceFilePath, targetFilePath);
+      if (!silentMode)
+        TSPOSTIO.copyFile(sourceFilePath, targetFilePath);
+      else
+        TSCORE.hideWaitingDialog();
     });
     rd.pipe(wr);
   };
 
-  var renameFile = function(filePath, newFilePath) {
+  var renameFile = function(filePath, newFilePath, silentMode) {
     console.log("Renaming file: " + filePath + " to " + newFilePath);
 
     if (filePath === newFilePath) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileTheSame"), $.i18n.t("ns.common:fileNotMoved"));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileTheSame"), $.i18n.t("ns.common:fileNotMoved"));
       return false;
     }
     if (fs.lstatSync(filePath).isDirectory()) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileIsDirectory", { fileName:filePath }));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileIsDirectory", { fileName:filePath }));
       return false;
     }
     if (fs.existsSync(newFilePath)) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileExists", { fileName:newFilePath }), $.i18n.t("ns.common:fileRenameFailed"));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileExists", { fileName:newFilePath }), $.i18n.t("ns.common:fileRenameFailed"));
       return false;
     }
     fs.rename(filePath, newFilePath, function(error) {
       if (error) {
         TSCORE.hideWaitingDialog();
-        TSCORE.showAlertDialog($.i18n.t("ns.common:fileRenameFailedDiffPartition", { fileName:filePath }));
+        if (!silentMode)
+          TSCORE.showAlertDialog($.i18n.t("ns.common:fileRenameFailedDiffPartition", { fileName:filePath }));
         return;
       }
-      TSPOSTIO.renameFile(filePath, newFilePath);
+      if (!silentMode)
+        TSPOSTIO.renameFile(filePath, newFilePath);
+      else
+        TSCORE.hideWaitingDialog();
     });
   };
 
@@ -410,6 +427,13 @@ define(function(require, exports, module) {
     fs.readFile(filePath, function (err, data) {
       if (err) throw err;
       callback(data);
+    });
+  }
+
+  var writeFile = function(filePath, buffer, callback) {
+    // TODO: Handle overwriting
+    fs.writeFile(filePath, buffer, function(err) {
+      callback(err);
     });
   }
 
@@ -556,7 +580,7 @@ define(function(require, exports, module) {
     }
   };
 
-  var deleteElement = function(path) {
+  var deleteElement = function(path, silentMode) {
     console.log("Deleting: " + path);
 
     fs.unlink(path, function(error) {
@@ -564,7 +588,10 @@ define(function(require, exports, module) {
         console.log("Deleting file " + path + " failed " + error);
         return;
       }
-      TSPOSTIO.deleteElement(path);
+      if (!silentMode)
+        TSPOSTIO.deleteElement(path);
+      else
+        TSCORE.hideLoadingAnimation();
     });
   };
 
@@ -661,7 +688,7 @@ define(function(require, exports, module) {
     mtime: Mon, 10 Oct 2011 23:24:11 GMT,
     ctime: Mon, 10 Oct 2011 23:24:11 GMT
   */
-  var getFileProperties = function(filePath) {
+  var getFileProperties = function(filePath, silentMode) {
     var fileProperties = {};
     try {
       var stats = fs.lstatSync(filePath);
@@ -669,7 +696,10 @@ define(function(require, exports, module) {
         fileProperties.path = filePath;
         fileProperties.size = stats.size;
         fileProperties.lmdt = stats.mtime;
-        TSPOSTIO.getFileProperties(fileProperties);
+        if (!silentMode)
+          TSPOSTIO.getFileProperties(fileProperties);
+        else
+          return fileProperties;
       } else {
         console.warn("Error getting file properties. " + filePath + " is directory");
       }
@@ -717,6 +747,7 @@ define(function(require, exports, module) {
   exports.copyFile = copyFile;
   exports.loadTextFile = loadTextFile;
   exports.readFile = readFile;
+  exports.writeFile = writeFile;
   exports.saveTextFile = saveTextFile;
   exports.saveBinaryFile = saveBinaryFile;
   exports.listDirectory = listDirectory;

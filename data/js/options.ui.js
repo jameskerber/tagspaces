@@ -114,6 +114,7 @@ define(function(require, exports, module) {
     $('#emailClientCommand').val(TSCORE.Config.getEmailClient());
     $('#attachmentArg').val(TSCORE.Config.getEmailAttachmentArgument());
     $('#attachmentSep').val(TSCORE.Config.getEmailAttachmentSeparator());
+    $('#maxFileSize').val(TSCORE.TagUtils.formatFileSize(TSCORE.Config.getEmailMaxFileSize(), true));
     $('#perspectiveList').empty();
     TSCORE.Config.getPerspectives().forEach(function(value) {
       addPerspective($('#perspectiveList'), value.id);
@@ -154,9 +155,45 @@ define(function(require, exports, module) {
     return keybinding;
   }
 
+  function parseFileSize(sizeString, siSystem) {
+    if (sizeString.length === 0)
+      return TSCORE.Config.DefaultSettings.emailMaxFileSize;
+
+    var threshold = siSystem ? 1000 : 1024;
+    var units = siSystem ? [
+      'kB',
+      'MB',
+      'GB',
+      'TB',
+      'PB',
+      'EB'
+    ] : [
+      'KiB',
+      'MiB',
+      'GiB',
+      'TiB',
+      'PiB',
+      'EiB'
+    ];
+
+    var size = 0, multiplier = threshold;
+    for (var i = 0; i < units.length; i++) {
+      if (sizeString.search(units[i]) > 0) {
+        size = parseFloat(sizeString.slice(0, sizeString.search(units[i])), 10).toFixed(1);
+        return size*multiplier;
+      }
+      multiplier *= threshold;
+    }
+    // If this point is reached, then the units are 'B'.
+    return parseFloat(sizeString, 10).toFixed(1);
+  }
+
   function updateSettings() {
     TSCORE.Config.setExtensionPath($('#extensionsPathInput').val());
-    TSCORE.Config.setWorkingPath($('#folderLocation').val());
+    if (TSCORE.Config.getWorkingPath() !== $('#folderLocation').val()) {
+      TSCORE.Config.setWorkingPath($('#folderLocation').val());
+      TSCORE.IO.createDirectory(TSCORE.Config.getWorkingPath());
+    }
     TSCORE.Config.setShowUnixHiddenEntries($('#showHiddenFilesCheckbox').is(':checked'));
     TSCORE.Config.setShowMainMenu($('#showMainMenuCheckbox').is(':checked'));
     TSCORE.Config.setCheckForUpdates($('#checkforUpdatesCheckbox').is(':checked'));
@@ -174,7 +211,8 @@ define(function(require, exports, module) {
     TSCORE.Config.setPropertiesDocumentKeyBinding(parseKeyBinding($('#documentPropertiesKeyBinding').val()));
     TSCORE.Config.setEmailClient($('#emailClientCommand').val());
     TSCORE.Config.setEmailAttachmentArgument($('#attachmentArg').val());
-    TSCORE.Config.setEmailAttachmentSeparator($('#attachmentSep').val())
+    TSCORE.Config.setEmailAttachmentSeparator($('#attachmentSep').val());
+    TSCORE.Config.setEmailMaxFileSize(parseFileSize($('#maxFileSize').val(), true));
 
     var interfaceLang = $('#languagesList').val();
     TSCORE.Config.setInterfaceLangauge(interfaceLang);

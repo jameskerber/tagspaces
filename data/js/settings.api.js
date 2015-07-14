@@ -285,6 +285,14 @@ define(function(require, exports, module) {
   var setEmailAttachmentSeparator = function(value) {
     exports.Settings.emailAttachmentSeparator = value;
   };
+  var getEmailMaxFileSize = function() {
+    if (undefined === exports.Settings.emailMaxFileSize)
+      exports.Settings.emailMaxFileSize = exports.DefaultSettings.emailMaxFileSize;
+    return exports.Settings.emailMaxFileSize;
+  };
+  var setEmailMaxFileSize = function(value) {
+    exports.Settings.emailMaxFileSize = value;
+  };
   var isFirstRun = function() {
     if (exports.Settings.firstRun === undefined) {
       exports.Settings.firstRun = false;
@@ -946,6 +954,8 @@ define(function(require, exports, module) {
   exports.setEmailAttachmentArgument = setEmailAttachmentArgument;
   exports.getEmailAttachmentSeparator = getEmailAttachmentSeparator;
   exports.setEmailAttachmentSeparator = setEmailAttachmentSeparator;
+  exports.getEmailMaxFileSize = getEmailMaxFileSize;
+  exports.setEmailMaxFileSize = setEmailMaxFileSize;
   exports.getShowUnixHiddenEntries = getShowUnixHiddenEntries;
   exports.setShowUnixHiddenEntries = setShowUnixHiddenEntries;
   exports.getCheckForUpdates = getCheckForUpdates;

@@ -144,7 +144,7 @@ define(function(require, exports, module) {
         }
 
         TSCORE.showLoadingAnimation();
-        TSCORE.exportFileListZip(TSCORE.selectedFiles, function(zipBlob) {
+        TSCORE.exportFileListZip(TSCORE.selectedFiles, "blob", true, function(zipBlob) {
           TSCORE.hideLoadingAnimation();
           saveAs(zipBlob, "export.zip");
         });
@@ -152,32 +152,24 @@ define(function(require, exports, module) {
 
     $("#" + this.extensionID + "ExportAndEmailButton")
       .click(function() {
-        if (0 === TSCORE.selectedFiles.length) {
-          console.log("No files selected for emailing");
-          return;
-        } else {
-          console.log("Exporting and attaching files");
-        }
-
-        TSCORE.showLoadingAnimation();
-        TSCORE.exportFileListZip(TSCORE.selectedFiles, function(zipBlob) {
-          //saveAs(zipBlob, "export.zip");
-          var command = TSCORE.Config.getEmailClient() + " \"" + TSCORE.Config.getEmailAttachmentArgument();
-          var attachments = "\'" + TSCORE.selectedFiles[0];
-          for (var i = 1; i < TSCORE.selectedFiles.length; i++) {
-            attachments += TSCORE.Config.getEmailAttachmentSeparator() + TSCORE.selectedFiles[i];
+        if (0 < TSCORE.selectedFiles.length) {
+          TSCORE.showLoadingAnimation();
+          // Make sure the size of files is appropriate for email.
+          var noError = true;
+          var size = 0;
+          for (var i = 0; i < TSCORE.selectedFiles.length; i++) {
+            size += TSCORE.IO.getFileProperties(TSCORE.selectedFiles[i], true)["size"];
           }
-          attachments += "\'\"";
-          console.log('Executing email client command: ' + command + attachments);
-          TSCORE.UI.executeExternally(command + attachments, function(error, stdout, stderr) {
-            if (null !== error) {
-              TSCORE.UI.showAlertDialog($.i18n.t('ns.dialogs:errorExecutingEmailCmdAlert'), 'Error');
-              console.log(stderr);
-            }
-          });
 
+          if (TSCORE.Config.getEmailMaxFileSize() > size) {
+            TSCORE.showExportAndEmailDialog();
+          } else {
+            TSCORE.UI.showAlertDialog($.i18n.t('ns.dialogs:emailFileTooLargeError', {
+              size: TSCORE.TagUtils.formatFileSize(size, true)
+            }), 'Error');
+          }
           TSCORE.hideLoadingAnimation();
-        });
+        }
       });
 
     $("#" + this.extensionID + "ReloadFolderButton")

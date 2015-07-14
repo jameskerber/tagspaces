@@ -374,14 +374,17 @@ define(function(require, exports, module) {
     if (fileExt.length > 0) {
       fileExt = '.' + fileExt;
     }
-    TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt);
+    TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt, true);
+    return containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt;
   }
 
   function cleanFilesFromTags(filePathArray) {
     console.log('Cleaning file from tags');
+    var cleanedFilePathArray = [];
     for (var i = 0; i < filePathArray.length; i++) {
-      cleanFileFromTags(filePathArray[i]);
+      cleanedFilePathArray.push(cleanFileFromTags(filePathArray[i]));
     }
+    return cleanedFilePathArray;
   }
 
   function addTag(filePathArray, tagArray) {

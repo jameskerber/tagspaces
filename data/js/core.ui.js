@@ -220,7 +220,7 @@ define(function(require, exports, module) {
         $('body').append(uiTemplate());
         $('#moveFilesButton').click(function(e) {
           e.preventDefault();
-          TSCORE.showWaitingDialog('Files are being renaming');
+          TSCORE.showWaitingDialog('Files are being renamed');
           var newFilePath;
           for (var i = 0; i < TSCORE.selectedFiles.length; i++) {
             newFilePath = $('#moveCopyDirectoryPath').val() + TSCORE.dirSeparator + TSCORE.TagUtils.extractFileName(TSCORE.selectedFiles[i]);
@@ -253,6 +253,123 @@ define(function(require, exports, module) {
         handle: '.modal-header'
       });
       $('#dialogMoveCopyFiles').modal({
+        backdrop: 'static',
+        show: true
+      });
+      console.log('Selected files: ' + TSCORE.selectedFiles);
+    });
+  };
+  var showExportAndEmailDialog = function() {
+    require(['text!templates/ExportAndEmailDialog.html'], function(uiTPL) {
+      if ($('#dialogExportAndEmail').length < 1) {
+        var uiTemplate = Handlebars.compile(uiTPL);
+        $('body').append(uiTemplate());
+        $('#sendEmailButton').click(function(e) {
+          e.preventDefault();
+          TSCORE.showWaitingDialog('Files are being prepared for sending');
+
+          if ($('#sendAsZip').prop('checked')) {
+            if ($('#includeTags').prop('checked')) {
+              var tmp = TSCORE.Config.getWorkingPath() + TSCORE.TagUtils.formatDateTime4Tag(new Date(), true) + TSCORE.dirSeparator;
+              TSCORE.IO.createDirectory(tmp, true);
+              TSCORE.exportFileListZip(TSCORE.selectedFiles, "nodebuffer", true, function(zipBuffer) {
+                TSCORE.IO.writeFile(tmp + "attachment.zip", zipBuffer, function(err) {
+                  if (err) {
+                    console.log("An error occured" + err);
+                  } else {
+                    var command = TSCORE.Config.getEmailClient() + " " + TSCORE.Config.getEmailAttachmentArgument();
+                    var attachments = "\'" + tmp + "attachment.zip" + "\'";
+                    console.log('Executing email client command: ' + command + attachments);
+                    TSCORE.UI.executeExternally(command + attachments, function(error, stdout, stderr) {
+                      if (null !== error) {
+                        TSCORE.UI.showAlertDialog($.i18n.t('ns.dialogs:errorExecutingEmailCmdAlert'), 'Error');
+                        console.log(stderr);
+                      }
+                    });
+                    hideWaitingDialog();
+                  }
+                });
+              });
+            } else {
+              var tmp = TSCORE.Config.getWorkingPath() + TSCORE.TagUtils.formatDateTime4Tag(new Date(), true) + TSCORE.dirSeparator;;
+              TSCORE.IO.createDirectory(tmp, true);
+              TSCORE.exportFileListZip(TSCORE.selectedFiles, "nodebuffer", false, function(zipBuffer) {
+                TSCORE.IO.writeFile(tmp + "attachment.zip", zipBuffer, function(err) {
+                  if (err) {
+                    console.log("An error occured" + err);
+                  } else {
+                    var command = TSCORE.Config.getEmailClient() + " " + TSCORE.Config.getEmailAttachmentArgument();
+                    var attachments = "\'" + tmp + "attachment.zip" + "\'";
+                    console.log('Executing email client command: ' + command + attachments);
+                    TSCORE.UI.executeExternally(command + attachments, function(error, stdout, stderr) {
+                      if (null !== error) {
+                        TSCORE.UI.showAlertDialog($.i18n.t('ns.dialogs:errorExecutingEmailCmdAlert'), 'Error');
+                        console.log(stderr);
+                      }
+                    });
+                    hideWaitingDialog();
+                  }
+                });
+              });
+            }
+          } else {
+            if ($('#includeTags').prop('checked')) {
+              // Attach files uncompressed.
+              var command = TSCORE.Config.getEmailClient() + " \"" + TSCORE.Config.getEmailAttachmentArgument();
+              var attachments = "\'" + TSCORE.selectedFiles[0];
+              for (var i = 1; i < TSCORE.selectedFiles.length; i++) {
+                attachments += TSCORE.Config.getEmailAttachmentSeparator() + TSCORE.selectedFiles[i];
+              }
+              attachments += "\'\"";
+              console.log('Executing email client command: ' + command + attachments);
+              TSCORE.UI.executeExternally(command + attachments, function(error, stdout, stderr) {
+                if (null !== error) {
+                  TSCORE.UI.showAlertDialog($.i18n.t('ns.dialogs:errorExecutingEmailCmdAlert'), 'Error');
+                  console.log(stderr);
+                }
+              });
+            } else {
+              // Copy files to working directory and clean tags from them.
+              var tmp = TSCORE.Config.getWorkingPath() + TSCORE.TagUtils.formatDateTime4Tag(new Date(), true) + TSCORE.dirSeparator;
+              TSCORE.IO.createDirectory(tmp, true);
+              var attachmentFiles = [];
+              for (var i = 0; i < TSCORE.selectedFiles.length; i++) {
+                var newFilePath = tmp + TSCORE.TagUtils.extractFileName(TSCORE.selectedFiles[i]);
+                TSCORE.IO.copyFile(TSCORE.selectedFiles[i], newFilePath, true);
+                attachmentFiles.push(newFilePath);
+              }
+              attachmentFiles = TSCORE.TagUtils.cleanFilesFromTags(attachmentFiles);
+
+              // Attach files uncompressed.
+              var command = TSCORE.Config.getEmailClient() + " \"" + TSCORE.Config.getEmailAttachmentArgument();
+              var attachments = "\'" + attachmentFiles[0];
+              for (var i = 1; i < attachmentFiles.length; i++) {
+                attachments += TSCORE.Config.getEmailAttachmentSeparator() + attachmentFiles[i];
+              }
+              attachments += "\'\"";
+              console.log('Executing email client command: ' + command + attachments);
+              TSCORE.UI.executeExternally(command + attachments, function(error, stdout, stderr) {
+                if (null !== error) {
+                  TSCORE.UI.showAlertDialog($.i18n.t('ns.dialogs:errorExecutingEmailCmdAlert'), 'Error');
+                  console.log(stderr);
+                }
+              });
+            }
+          }
+          hideWaitingDialog();
+        });
+      }
+      $('#emailFileList').children().remove();
+      for (var i = 0; i < TSCORE.selectedFiles.length; i++) {
+        $('#emailFileList').append($('<p>', {
+          text: TSCORE.TagUtils.extractFileName(TSCORE.selectedFiles[i])
+        }));
+      }
+      $('#dialogExportAndEmail').i18n();
+      $('#dialogExportAndEmail').draggable({
+        handle: '.modal-header'
+      });
+      $('#dialogExportAndEmail').modal({
         backdrop: 'static',
         show: true
       });
@@ -789,6 +906,7 @@ define(function(require, exports, module) {
   exports.showTagsPanel = showTagsPanel;
   exports.showDirectoryBrowserDialog = showDirectoryBrowserDialog;
   exports.showMoveCopyFilesDialog = showMoveCopyFilesDialog;
+  exports.showExportAndEmailDialog = showExportAndEmailDialog;
   exports.hideAllDropDownMenus = hideAllDropDownMenus;
   exports.createHTMLFile = createHTMLFile;
   exports.createMDFile = createMDFile;

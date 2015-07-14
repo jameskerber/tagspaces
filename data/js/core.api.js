@@ -272,27 +272,35 @@ define(function(require, exports, module) {
     return csv;
   }
 
-  function exportFileListZip(fileList, callback) {
+  function exportFileListZip(fileList, returnType, includeTags, callback) {
     if (fileList === "undefined" || fileList.length < 1)
       return;
 
     var zip = new JSZip();
     // TODO: Handle the additional tags.
-    addToZipFile(zip, fileList, 0, callback);
+    addToZipFile(zip, fileList, 0, returnType, includeTags, callback);
   }
 
-  function addToZipFile(zipFile, fileList, currentFileIndex, callback) {
+  function addToZipFile(zipFile, fileList, currentFileIndex, returnType, includeTags, callback) {
     if (currentFileIndex === fileList.length) {
-      callback(zipFile.generate({type:"blob"}));
+      callback(zipFile.generate({type: returnType}));
       return;
     } else if (currentFileIndex > fileList.length) {
       return;
     }
 
     tsIOApi.readFile(fileList[currentFileIndex], function(data) {
-      zipFile.file(tsTagUtils.extractFileName(fileList[currentFileIndex]), data);
+      if (includeTags) {
+        zipFile.file(tsTagUtils.extractFileName(fileList[currentFileIndex]), data);
+      } else {
+        var title = tsTagUtils.extractTitle(fileList[currentFileIndex]);
+        var ext = tsTagUtils.extractFileExtension(fileList[currentFileIndex]);
+        if (ext.length > 0)
+          ext = '.' + ext;
+        zipFile.file(title + ext, data);
+      }
       currentFileIndex++;
-      addToZipFile(zipFile, fileList, currentFileIndex, callback);
+      addToZipFile(zipFile, fileList, currentFileIndex, returnType, includeTags, callback);
     });
   }
 
@@ -636,6 +644,7 @@ define(function(require, exports, module) {
   exports.showWaitingDialog = tsCoreUI.showWaitingDialog;
   exports.hideWaitingDialog = tsCoreUI.hideWaitingDialog;
   exports.showMoveCopyFilesDialog = tsCoreUI.showMoveCopyFilesDialog;
+  exports.showExportAndEmailDialog = tsCoreUI.showExportAndEmailDialog;
   exports.showAddTagsDialog = tsTagsUI.showAddTagsDialog;
   exports.showTagEditInTreeDialog = tsTagsUI.showTagEditInTreeDialog;
   exports.showDialogTagCreate = tsTagsUI.showDialogTagCreate;
