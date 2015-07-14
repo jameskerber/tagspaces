@@ -406,6 +406,13 @@ define(function(require, exports, module) {
     }
   };
 
+  var readFile = function(filePath, callback) {
+    fs.readFile(filePath, function (err, data) {
+      if (err) throw err;
+      callback(data);
+    });
+  }
+
   /* var loadEXIF = function(filePath) {
       console.log("Loading file: "+filePath);
 
@@ -709,6 +716,7 @@ define(function(require, exports, module) {
   exports.renameFile = renameFile;
   exports.copyFile = copyFile;
   exports.loadTextFile = loadTextFile;
+  exports.readFile = readFile;
   exports.saveTextFile = saveTextFile;
   exports.saveBinaryFile = saveBinaryFile;
   exports.listDirectory = listDirectory;

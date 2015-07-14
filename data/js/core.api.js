@@ -17,6 +17,7 @@ define(function(require, exports, module) {
   var tsSearch = require('tssearch');
   var tsPro = require('tspro');
   var tsUtils = require('tsutils');
+  var JSZip = require("jszip");
   var currentPath;
   var currentLocationObject;
   var currentPerspectiveID;
@@ -269,6 +270,30 @@ define(function(require, exports, module) {
     }
     csv += rows.join('\n');
     return csv;
+  }
+
+  function exportFileListZip(fileList, callback) {
+    if (fileList === "undefined" || fileList.length < 1)
+      return;
+
+    var zip = new JSZip();
+    // TODO: Handle the additional tags.
+    addToZipFile(zip, fileList, 0, callback);
+  }
+
+  function addToZipFile(zipFile, fileList, currentFileIndex, callback) {
+    if (currentFileIndex === fileList.length) {
+      callback(zipFile.generate({type:"blob"}));
+      return;
+    } else if (currentFileIndex > fileList.length) {
+      return;
+    }
+
+    tsIOApi.readFile(fileList[currentFileIndex], function(data) {
+      zipFile.file(tsTagUtils.extractFileName(fileList[currentFileIndex]), data);
+      currentFileIndex++;
+      addToZipFile(zipFile, fileList, currentFileIndex, callback);
+    });
   }
 
   function exportFileListArray(fileList) {
@@ -574,6 +599,7 @@ define(function(require, exports, module) {
   exports.toggleFullWidth = toggleFullWidth;
   exports.updateNewVersionData = updateNewVersionData;
   exports.exportFileListCSV = exportFileListCSV;
+  exports.exportFileListZip = exportFileListZip;
   exports.exportFileListArray = exportFileListArray;
   exports.removeFileModel = removeFileModel;
   exports.updateFileModel = updateFileModel;

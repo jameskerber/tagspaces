@@ -134,6 +134,22 @@ define(function(require, exports, module) {
         //console.log("Export data: "+TSCORE.exportFileListCSV(TSCORE.fileList));
       });
 
+    $("#" + this.extensionID + "Export2ZipButton")
+      .click(function() {
+        if (0 === TSCORE.selectedFiles.length) {
+          console.log("No files selected for export");
+          return;
+        } else {
+          console.log("Exporting files in zip archive");
+        }
+
+        TSCORE.showLoadingAnimation();
+        TSCORE.exportFileListZip(TSCORE.selectedFiles, function(zipBlob) {
+          TSCORE.hideLoadingAnimation();
+          saveAs(zipBlob, "export.zip");
+        });
+      });
+
     $("#" + this.extensionID + "ReloadFolderButton")
       .click(function() {
         TSCORE.navigateToDirectory(TSCORE.currentPath);

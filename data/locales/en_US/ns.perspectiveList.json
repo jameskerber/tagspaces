@@ -17,6 +17,8 @@
     "showNewFileDialog": "Advanced File Creation",
     "exportToCSV": "Export to CSV",
     "exportToCSVTooltip": "Export current file structure in CSV(Comma Separated Value) format",
+    "exportToZip": "Export to zip archive",
+    "exportToZipTooltip": "Export current selected files as compressed zip archive",
     "showSubfolderContent": "Content of the Subfolders",
     "showSubfolderContentTooltip": "Show Content of the Subfolders",
     "deleteSelectedFilesTooltip": "Delete Selected Files",
