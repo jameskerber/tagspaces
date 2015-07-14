@@ -63,6 +63,11 @@ define(function(require, exports, module) {
       $('#keyBindingInstructions').toggle();
       return false;
     });
+    $('#exportInstructions').toggle();
+    $('#exportInstructionsToggle').on('click', function() {
+      $('#exportInstructions').toggle();
+      return false;
+    });
     if (isCordova) {
       $('#exportTagGroupsButton').hide();
     }
@@ -78,10 +83,19 @@ define(function(require, exports, module) {
       saveAs(blob, 'tsm[' + TSCORE.TagUtils.formatDateTime4Tag(new Date(), true) + '].json');
       console.log('Group Data Saved...');
     });
+    if (isWeb) {
+      $('#selectLocalDirectory').attr('style', 'visibility: hidden');
+    } else {
+      $('#selectLocalDirectory').on('click', function(e) {
+        e.preventDefault();
+        TSCORE.IO.selectDirectory();
+      });
+    }
   }
 
   function reInitUI() {
     $('#extensionsPathInput').val(TSCORE.Config.getExtensionPath());
+    $('#folderLocation').val(TSCORE.Config.getWorkingPath());
     $('#showHiddenFilesCheckbox').attr('checked', TSCORE.Config.getShowUnixHiddenEntries());
     $('#showMainMenuCheckbox').attr('checked', TSCORE.Config.getShowMainMenu());
     $('#checkforUpdatesCheckbox').attr('checked', TSCORE.Config.getCheckForUpdates());
@@ -97,6 +111,9 @@ define(function(require, exports, module) {
     $('#reloadDocumentKeyBinding').val(TSCORE.Config.getReloadDocumentKeyBinding());
     $('#saveDocumentKeyBinding').val(TSCORE.Config.getSaveDocumentKeyBinding());
     $('#documentPropertiesKeyBinding').val(TSCORE.Config.getPropertiesDocumentKeyBinding());
+    $('#emailClientCommand').val(TSCORE.Config.getEmailClient());
+    $('#attachmentArg').val(TSCORE.Config.getEmailAttachmentArgument());
+    $('#attachmentSep').val(TSCORE.Config.getEmailAttachmentSeparator());
     $('#perspectiveList').empty();
     TSCORE.Config.getPerspectives().forEach(function(value) {
       addPerspective($('#perspectiveList'), value.id);
@@ -139,6 +156,7 @@ define(function(require, exports, module) {
 
   function updateSettings() {
     TSCORE.Config.setExtensionPath($('#extensionsPathInput').val());
+    TSCORE.Config.setWorkingPath($('#folderLocation').val());
     TSCORE.Config.setShowUnixHiddenEntries($('#showHiddenFilesCheckbox').is(':checked'));
     TSCORE.Config.setShowMainMenu($('#showMainMenuCheckbox').is(':checked'));
     TSCORE.Config.setCheckForUpdates($('#checkforUpdatesCheckbox').is(':checked'));
@@ -154,6 +172,9 @@ define(function(require, exports, module) {
     TSCORE.Config.setReloadDocumentKeyBinding(parseKeyBinding($('#reloadDocumentKeyBinding').val()));
     TSCORE.Config.setSaveDocumentKeyBinding(parseKeyBinding($('#saveDocumentKeyBinding').val()));
     TSCORE.Config.setPropertiesDocumentKeyBinding(parseKeyBinding($('#documentPropertiesKeyBinding').val()));
+    TSCORE.Config.setEmailClient($('#emailClientCommand').val());
+    TSCORE.Config.setEmailAttachmentArgument($('#attachmentArg').val());
+    TSCORE.Config.setEmailAttachmentSeparator($('#attachmentSep').val())
 
     var interfaceLang = $('#languagesList').val();
     TSCORE.Config.setInterfaceLangauge(interfaceLang);

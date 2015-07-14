@@ -624,6 +624,13 @@ define(function(require, exports, module) {
     }
   }
 
+  function executeExternally(cmd, callback) {
+    childProcess.exec(cmd, function(error, stdout, stderr) {
+      if (undefined !== callback)
+        callback(error, stdout, stderr);
+    });
+  }
+
   function clearSearchFilter() {
     $('#searchOptions').hide();
     $('#searchBox').val('');
@@ -764,6 +771,7 @@ define(function(require, exports, module) {
   exports.initUI = initUI;
   exports.clearSearchFilter = clearSearchFilter;
   exports.openLinkExternally = openLinkExternally;
+  exports.executeExternally = executeExternally;
   exports.enableTopToolbar = enableTopToolbar;
   exports.disableTopToolbar = disableTopToolbar;
   exports.hideWaitingDialog = hideWaitingDialog;

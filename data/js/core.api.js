@@ -17,7 +17,7 @@ define(function(require, exports, module) {
   var tsSearch = require('tssearch');
   var tsPro = require('tspro');
   var tsUtils = require('tsutils');
-  var JSZip = require("jszip");
+  var JSZip = require('jszip');
   var currentPath;
   var currentLocationObject;
   var currentPerspectiveID;
@@ -610,6 +610,7 @@ define(function(require, exports, module) {
   // TODO use TSCORE.UI instead
   exports.clearSearchFilter = tsCoreUI.clearSearchFilter;
   exports.openLinkExternally = tsCoreUI.openLinkExternally;
+  exports.executeExternally = tsCoreUI.executeExternally;
   exports.enableTopToolbar = tsCoreUI.enableTopToolbar;
   exports.disableTopToolbar = tsCoreUI.disableTopToolbar;
   exports.showAlertDialog = tsCoreUI.showAlertDialog;

@@ -32,6 +32,7 @@ try {
   var fs = require('fs');
   var pathUtils = require('path');
   var gui = require('nw.gui');
+  var childProcess = require('child_process');
   isNode = true;
 } catch(e) {
   isNode = false;

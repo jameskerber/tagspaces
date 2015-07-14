@@ -18,6 +18,7 @@ define(function (require, exports, module) {
         "firstRun":                 true,
         "lastOpenedDirectory":      "",
         "tagspacesList":            [],
+        "workingPath":              "~/Downloads/",
         "extensionsPath":           "ext",
         "showWarningRecursiveScan": true,
         "prefixTagContainer":       "",
@@ -33,6 +34,9 @@ define(function (require, exports, module) {
         "ootbViewers":              [ "viewerBrowser", "viewerMD", "viewerImage", "viewerPDF", "editorText", "viewerText", "editorODF", "viewerURL", "viewerHTML", "viewerMHTML", "editorJSON", "viewerZIP", "viewerEPUB" ],
         "ootbEditors":              [ "editorHTML", "editorText", "editorODF", "editorJSON", "editorNext" ],
         "perspectives":             [{ 'id': 'perspectiveList' }, { 'id': 'perspectiveGrid' }, { 'id': 'perspectiveGraph' }],
+        "emailClient":              "thunderbird -compose",
+        "emailAttachmentArgument":  "attachment=",
+        "emailAttachmentSeparator": ",",
         "interfaceLanguage": "en_US",
         "supportedLanguages": [
             { "iso": "en_US", "title": "English" },

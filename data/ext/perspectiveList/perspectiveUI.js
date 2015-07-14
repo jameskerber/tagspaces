@@ -150,6 +150,36 @@ define(function(require, exports, module) {
         });
       });
 
+    $("#" + this.extensionID + "ExportAndEmailButton")
+      .click(function() {
+        if (0 === TSCORE.selectedFiles.length) {
+          console.log("No files selected for emailing");
+          return;
+        } else {
+          console.log("Exporting and attaching files");
+        }
+
+        TSCORE.showLoadingAnimation();
+        TSCORE.exportFileListZip(TSCORE.selectedFiles, function(zipBlob) {
+          //saveAs(zipBlob, "export.zip");
+          var command = TSCORE.Config.getEmailClient() + " \"" + TSCORE.Config.getEmailAttachmentArgument();
+          var attachments = "\'" + TSCORE.selectedFiles[0];
+          for (var i = 1; i < TSCORE.selectedFiles.length; i++) {
+            attachments += TSCORE.Config.getEmailAttachmentSeparator() + TSCORE.selectedFiles[i];
+          }
+          attachments += "\'\"";
+          console.log('Executing email client command: ' + command + attachments);
+          TSCORE.UI.executeExternally(command + attachments, function(error, stdout, stderr) {
+            if (null !== error) {
+              TSCORE.UI.showAlertDialog($.i18n.t('ns.dialogs:errorExecutingEmailCmdAlert'), 'Error');
+              console.log(stderr);
+            }
+          });
+
+          TSCORE.hideLoadingAnimation();
+        });
+      });
+
     $("#" + this.extensionID + "ReloadFolderButton")
       .click(function() {
         TSCORE.navigateToDirectory(TSCORE.currentPath);
@@ -435,10 +465,12 @@ define(function(require, exports, module) {
 
     // Enable all buttons
     this.viewToolbar.find(".btn").prop('disabled', false);
-    // Disable certain buttons again	
+    // Disable certain buttons again	reInit
     $("#" + this.extensionID + "IncreaseThumbsButton").prop('disabled', true);
     $("#" + this.extensionID + "TagButton").prop('disabled', true);
     $("#" + this.extensionID + "CopyMoveButton").prop('disabled', true);
+    $("#" + this.extensionID + "Export2ZipButton").prop('disabled', true);
+    $("#" + this.extensionID + "ExportAndEmailButton").prop('disabled', true);
 
     //Update statusbar
     if (this.searchResults.length !== undefined) {
@@ -603,19 +635,27 @@ define(function(require, exports, module) {
 
     var tagButton = $("#" + this.extensionID + "TagButton");
     var copyMoveButton = $("#" + this.extensionID + "CopyMoveButton");
+    var export2ZipButton = $("#" + this.extensionID + "Export2ZipButton");
+    var exportAndEmailButton = $("#" + this.extensionID + "ExportAndEmailButton");
     var deleteSelectedFilesButton = $("#" + this.extensionID + "DeleteSelectedFilesButton"); 
 
     if (TSCORE.selectedFiles.length > 1) {
       tagButton.prop('disabled', false);
       copyMoveButton.prop('disabled', false);
+      export2ZipButton.prop('disabled', false);
+      exportAndEmailButton.prop('disabled', false);
       deleteSelectedFilesButton.prop('disabled', false);
     } else if (TSCORE.selectedFiles.length === 1) {
       tagButton.prop('disabled', false);
       copyMoveButton.prop('disabled', false);
+      export2ZipButton.prop('disabled', false);
+      exportAndEmailButton.prop('disabled', false);
       deleteSelectedFilesButton.prop('disabled', false);
     } else {
       tagButton.prop('disabled', true);
       copyMoveButton.prop('disabled', true);
+      export2ZipButton.prop('disabled', true);
+      exportAndEmailButton.prop('disabled', true);
       deleteSelectedFilesButton.prop('disabled', true);
     }
   };

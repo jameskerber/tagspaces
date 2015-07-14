@@ -253,6 +253,38 @@ define(function(require, exports, module) {
   var setExtensionPath = function(value) {
     exports.Settings.extensionsPath = value;
   };
+  var getWorkingPath = function() {
+    if (undefined === exports.Settings.workingPath)
+      exports.Settings.workingPath = exports.DefaultSettings.workingPath;
+    return exports.Settings.workingPath;
+  };
+  var setWorkingPath = function(value) {
+    exports.Settings.workingPath = value;
+  };
+  var getEmailClient = function() {
+    if (undefined === exports.Settings.emailClient)
+      exports.Settings.emailClient = exports.DefaultSettings.emailClient;
+    return exports.Settings.emailClient;
+  };
+  var setEmailClient = function(value) {
+    exports.Settings.emailClient = value;
+  };
+  var getEmailAttachmentArgument = function() {
+    if (undefined === exports.Settings.emailAttachmentArgument)
+      exports.Settings.emailAttachmentArgument = exports.DefaultSettings.emailAttachmentArgument;
+    return exports.Settings.emailAttachmentArgument;
+  };
+  var setEmailAttachmentArgument = function(value) {
+    exports.Settings.emailAttachmentArgument = value;
+  };
+  var getEmailAttachmentSeparator = function() {
+    if (undefined === exports.Settings.emailAttachmentSeparator)
+      exports.Settings.emailAttachmentSeparator = exports.DefaultSettings.emailAttachmentSeparator;
+    return exports.Settings.emailAttachmentSeparator;
+  };
+  var setEmailAttachmentSeparator = function(value) {
+    exports.Settings.emailAttachmentSeparator = value;
+  };
   var isFirstRun = function() {
     if (exports.Settings.firstRun === undefined) {
       exports.Settings.firstRun = false;
@@ -906,6 +938,14 @@ define(function(require, exports, module) {
   exports.isFirstRun = isFirstRun;
   exports.getExtensionPath = getExtensionPath;
   exports.setExtensionPath = setExtensionPath;
+  exports.getWorkingPath = getWorkingPath;
+  exports.setWorkingPath = setWorkingPath;
+  exports.getEmailClient = getEmailClient;
+  exports.setEmailClient = setEmailClient;
+  exports.getEmailAttachmentArgument = getEmailAttachmentArgument;
+  exports.setEmailAttachmentArgument = setEmailAttachmentArgument;
+  exports.getEmailAttachmentSeparator = getEmailAttachmentSeparator;
+  exports.setEmailAttachmentSeparator = setEmailAttachmentSeparator;
   exports.getShowUnixHiddenEntries = getShowUnixHiddenEntries;
   exports.setShowUnixHiddenEntries = setShowUnixHiddenEntries;
   exports.getCheckForUpdates = getCheckForUpdates;
