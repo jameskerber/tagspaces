@@ -833,7 +833,7 @@ define(function(require, exports, module) {
     }
   };
   var getLocation = function(path) {
-    var location;
+    var location = undefined;
     exports.Settings.tagspacesList.forEach(function(value) {
       if (path.indexOf(value.path) > -1) {
         location = value;

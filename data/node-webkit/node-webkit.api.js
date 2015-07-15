@@ -282,7 +282,7 @@ define(function(require, exports, module) {
     });
   };
 
-  var copyFile = function(sourceFilePath, targetFilePath) {
+  var copyFile = function(sourceFilePath, targetFilePath, silentMode) {
     console.log("Copy file: " + sourceFilePath + " to " + targetFilePath);
 
     if (sourceFilePath.toLowerCase() === targetFilePath.toLowerCase()) {
@@ -312,7 +312,15 @@ define(function(require, exports, module) {
       TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
     });
     wr.on("close", function(ex) {
-      TSPOSTIO.copyFile(sourceFilePath, targetFilePath);
+      var oldMethod = TSCORE.Config.getLocation(sourceFilePath).tagMethod;
+      var newMethod = oldMethod;
+      if (TSCORE.Config.getLocation(targetFilePath) !== undefined) {
+        // File is being copied to another tagspaces directory.
+        newMethod = TSCORE.Config.getLocation(targetFilePath).tagMethod;
+      }
+      var tags = TSCORE.TagUtils.convertTags(targetFilePath, oldMethod, newMethod, sourceFilePath);
+      if (!silentMode)
+        TSPOSTIO.copyFile(sourceFilePath, targetFilePath);
     });
     rd.pipe(wr);
   };

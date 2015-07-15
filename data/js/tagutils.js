@@ -256,10 +256,13 @@ define(function(require, exports, module) {
     }
   }
 
-  function extractTags(filePath) {
-    if (TSCORE.Config.getLocation(filePath).tagMethod === "2")
+  function extractTags(filePath, tagMethod) {
+    if (undefined === tagMethod) {
+      tagMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+    }
+    if (tagMethod === "2")
       console.log('Extracting tags from database');
-    else if (TSCORE.Config.getLocation(filePath).tagMethod === "1")
+    else if (tagMethod === "1")
       console.log('Extracting tags from: ' + filePath + TAG_FILE_EXTENSION);
     else
       console.log('Extracting tags from: ' + filePath);
@@ -267,7 +270,7 @@ define(function(require, exports, module) {
     var fileName = extractFileName(filePath);
     // WithoutExt
     var tags = [];
-    if (TSCORE.Config.getLocation(filePath).tagMethod === "2") {
+    if (tagMethod === "2") {
       // Get tags from database.
       try {
         var doc = TSCORE.IO.readDatabase(TSCORE.Config.getLocation(filePath).path + TAG_DATABASE_NAME, filePath);
@@ -277,7 +280,7 @@ define(function(require, exports, module) {
         return [];
       }
 
-    } else if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
+    } else if (tagMethod === "1") {
       // Read tags from the tag file.
       try {
         tags = TSCORE.IO.readFileSync(filePath + TAG_FILE_EXTENSION);
@@ -312,6 +315,18 @@ define(function(require, exports, module) {
     }
     console.log('Extracting finished ');
     return cleanedTags;
+  }
+
+  // Use originalFilePath when copying/moving files.
+  function convertTags(filePath, oldMethod, newMethod, originalFilePath) {
+    if (undefined === originalFilePath) {
+      originalFilePath = filePath;
+    }
+    var oldTags = extractTags(originalFilePath, oldMethod);
+    if (oldTags.length > 0) {
+      cleanFileFromTags(filePath, oldMethod);
+      writeTagsToFile(filePath, oldTags, newMethod, true);
+    }
   }
 
   function suggestTags(filePath) {
@@ -399,11 +414,18 @@ define(function(require, exports, module) {
     return tagsString;
   };
 
-  function writeTagsToFile(filePath, tags) {
+  function writeTagsToFile(filePath, tags, tagMethod, isConversion) {
     console.log('Add the tags to: ' + filePath);
+    if (undefined === tagMethod) {
+      tagMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+    }
     var fileName = extractFileName(filePath);
     var containingDirectoryPath = extractContainingDirectoryPath(filePath);
-    var extractedTags = extractTags(filePath);
+    // No tags for destination file as it was cleaned during conversion.
+    var extractedTags = [];
+    if (!isConversion)
+      extractedTags = extractTags(filePath, tagMethod);
+
     for (var i = 0; i < tags.length; i++) {
       // check if tag is already in the tag array
       if (extractedTags.indexOf(tags[i].trim()) < 0) {
@@ -412,13 +434,13 @@ define(function(require, exports, module) {
       }
     }
 
-    if (TSCORE.Config.getLocation(filePath).tagMethod === "2") {
+    if (tagMethod === "2") {
       var newTagFileContent = JSON.parse(JSON.stringify(tagDatabaseTemplate));
       newTagFileContent._id = filePath;
       newTagFileContent.tags = generateTagFileContents(extractedTags);
       TSCORE.IO.writeDatabase(TSCORE.Config.getLocation(filePath).path + TAG_DATABASE_NAME, newTagFileContent);
 
-    } else if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
+    } else if (tagMethod === "1") {
       var newTagFileContent = generateTagFileContents(extractedTags);
       TSCORE.IO.saveTextFile(filePath + TAG_FILE_EXTENSION, newTagFileContent, true, true);
 
@@ -426,7 +448,8 @@ define(function(require, exports, module) {
       var newFileName = generateFileName(fileName, extractedTags);
       TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
     }
-    collectRecentTags(tags);
+    if (!isConversion)
+      collectRecentTags(tags);
   }
 
   function removeTagsFromFile(filePath, tags) {
@@ -456,12 +479,15 @@ define(function(require, exports, module) {
     }
   }
 
-  function cleanFileFromTags(filePath) {
+  function cleanFileFromTags(filePath, tagMethod) {
     console.log('Cleaning file from tags: ' + filePath);
-    if (TSCORE.Config.getLocation(filePath).tagMethod === "2") {
+    if (undefined === tagMethod) {
+      tagMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+    }
+    if (tagMethod === "2") {
       TSCORE.IO.clearDatabaseEntry(TSCORE.Config.getLocation(filePath).path + TAG_DATABASE_NAME, newTagFileContent);
 
-    } else if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
+    } else if (tagMethod === "1") {
       TSCORE.IO.deleteElement(filePath + TAG_FILE_EXTENSION, true);
 
     } else {
@@ -658,6 +684,7 @@ define(function(require, exports, module) {
   exports.formatDateTime = formatDateTime;
   exports.formatDateTime4Tag = formatDateTime4Tag;
   exports.convertStringToDate = convertStringToDate;
+  exports.convertTags = convertTags;
   exports.extractTags = extractTags;
   exports.suggestTags = suggestTags;
   exports.writeTagsToFile = writeTagsToFile;
