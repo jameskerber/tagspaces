@@ -136,18 +136,9 @@ define(function(require, exports, module) {
 
     $("#" + this.extensionID + "Export2ZipButton")
       .click(function() {
-        if (0 === TSCORE.selectedFiles.length) {
-          console.log("No files selected for export");
-          return;
-        } else {
-          console.log("Exporting files in zip archive");
-        }
-
         TSCORE.showLoadingAnimation();
-        TSCORE.exportFileListZip(TSCORE.selectedFiles, "blob", true, function(zipBlob) {
-          TSCORE.hideLoadingAnimation();
-          saveAs(zipBlob, "export.zip");
-        });
+        TSCORE.showExportAndEmailDialog(false);
+        TSCORE.hideLoadingAnimation();
       });
 
     $("#" + this.extensionID + "ExportAndEmailButton")
@@ -162,7 +153,7 @@ define(function(require, exports, module) {
           }
 
           if (TSCORE.Config.getEmailMaxFileSize() > size) {
-            TSCORE.showExportAndEmailDialog();
+            TSCORE.showExportAndEmailDialog(true);
           } else {
             TSCORE.UI.showAlertDialog($.i18n.t('ns.dialogs:emailFileTooLargeError', {
               size: TSCORE.TagUtils.formatFileSize(size, true)

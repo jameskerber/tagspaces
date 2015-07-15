@@ -178,5 +178,7 @@
     "directoryRenameFailed": "Directory renaming failed!",
     "functionalityNotImplemented" : "This functionality is not implemented yet.",
     "invalidImportFile": "The imported file has invalid format",
+    "exportAndEmailSendAsZip": "Send files in zip archive",
+    "exportAndEmailIncludeTags": "Include tags",
     "-": "-"
 }

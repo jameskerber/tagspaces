@@ -12,7 +12,7 @@
                     <li><a href="#filetypes" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:fileTypeTab">File Types</a></li>
                     <li><a href="#keyBindings" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:keyBindingsTab">Key Bindings</a></li>
                     <li><a href="#experimental" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:experimentalTab">Experimental*</a></li>
-                    <li><a href="#exportSettings" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:exportTab">Experimental*</a></li>
+                    <li><a href="#exportSettings" data-toggle="tab" class="optionsTitle" data-i18n="ns.dialogs:exportTab">Export</a></li>
                 </ul>
             </div>
             <div class="modal-body form" style="height: 380px;" id="optionsAccordion">
@@ -64,6 +64,18 @@
                                 </div>
                             </div>
                             <div class="col-sm-9" style="margin-top: 0;" data-i18n="ns.dialogs:showMainMenu"></div>
+                        </div>
+                        <div class='form-group row' style="margin: 15px 0 0 0;">
+                            <div class="form-group col-sm-12">
+                                <label class="control-label" for="folderLocation" data-i18n="ns.dialogs:createWorkingPath"></label>
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="folderLocation" id="folderLocation" required/>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" id="selectLocalDirectory" data-i18n="[title]ns.dialogs:createWorkingPathSelectFolder">
+                                            &nbsp;&nbsp;<i class="fa fa-folder-open"></i>&nbsp;&nbsp;
+                                        </button> </span>
+                                </div><!-- /input-group -->
+                            </div>
                         </div>
                     </div>
 
@@ -199,16 +211,6 @@
                         <div class='form-group col-sm-12'>
                             <label for='extensionsPathInput' data-i18n="ns.dialogs:extensionsFolder">Extensions folder (default value is "ext")</label>
                             <input type='text' class='form-control' id='extensionsPathInput' data-i18n="[placeholder]ns.dialogs:extensionsFolderPlaceholder"/>
-                        </div>
-                        <div class="form-group col-sm-12">
-                            <label class="control-label" for="folderLocation" data-i18n="ns.dialogs:createWorkingPath"></label>
-                            <div class="input-group">
-                                <input class="form-control" type="text" name="folderLocation" id="folderLocation" required/>
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" id="selectLocalDirectory" data-i18n="[title]ns.dialogs:createWorkingPathSelectFolder">
-                                        &nbsp;&nbsp;<i class="fa fa-folder-open"></i>&nbsp;&nbsp;
-                                    </button> </span>
-                            </div><!-- /input-group -->
                         </div>
                     </div>
 

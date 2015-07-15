@@ -259,13 +259,17 @@ define(function(require, exports, module) {
       console.log('Selected files: ' + TSCORE.selectedFiles);
     });
   };
-  var showExportAndEmailDialog = function() {
+  var showExportAndEmailDialog = function(isEmail) {
     require(['text!templates/ExportAndEmailDialog.html'], function(uiTPL) {
       if ($('#dialogExportAndEmail').length < 1) {
         var uiTemplate = Handlebars.compile(uiTPL);
         $('body').append(uiTemplate());
-        $('#sendEmailButton').click(function(e) {
-          e.preventDefault();
+      }
+      // Re-register the click event based on isEmail.
+      $('#exportAndEmailButton').off("click");
+      $('#exportAndEmailButton').on("click", function(e) {
+        e.preventDefault();
+        if (isEmail) {
           TSCORE.showWaitingDialog('Files are being prepared for sending');
 
           if ($('#sendAsZip').prop('checked')) {
@@ -356,8 +360,22 @@ define(function(require, exports, module) {
               });
             }
           }
-          hideWaitingDialog();
-        });
+        } else {
+          TSCORE.exportFileListZip(TSCORE.selectedFiles, "blob", $('#includeTags').prop('checked'), function(zipBlob) {
+            TSCORE.hideLoadingAnimation();
+            saveAs(zipBlob, "export.zip");
+          });
+        }
+        hideWaitingDialog();
+      });
+      if (isEmail) {
+        $('#sendAsZipCheckbox').prop('hidden', false);
+        $('#exportAndEmailButton').text($.i18n.t('ns.dialogs:sendEmailButton'));
+        $('#exportAndEmailTitle').text($.i18n.t('ns.dialogs:sendEmailTitle'));
+      } else {
+        $('#sendAsZipCheckbox').prop('hidden', true);
+        $('#exportAndEmailButton').text($.i18n.t('ns.dialogs:exportZipButton'));
+        $('#exportAndEmailTitle').text($.i18n.t('ns.dialogs:exportZipTitle'));
       }
       $('#emailFileList').children().remove();
       for (var i = 0; i < TSCORE.selectedFiles.length; i++) {
