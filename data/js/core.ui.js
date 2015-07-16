@@ -224,7 +224,9 @@ define(function(require, exports, module) {
           var newFilePath;
           for (var i = 0; i < TSCORE.selectedFiles.length; i++) {
             newFilePath = $('#moveCopyDirectoryPath').val() + TSCORE.dirSeparator + TSCORE.TagUtils.extractFileName(TSCORE.selectedFiles[i]);
-            TSCORE.IO.renameFile(TSCORE.selectedFiles[i], newFilePath);
+            TSCORE.IO.renameFile(TSCORE.selectedFiles[i], newFilePath, true, function() {
+              TSCORE.TagUtils.updateTagsOnIOAction("mv", TSCORE.selectedFiles[i], newFilePath);
+            });
           }
         });
         $('#copyFilesButton').click(function(e) {
@@ -233,7 +235,10 @@ define(function(require, exports, module) {
           var newFilePath;
           for (var i = 0; i < TSCORE.selectedFiles.length; i++) {
             newFilePath = $('#moveCopyDirectoryPath').val() + TSCORE.dirSeparator + TSCORE.TagUtils.extractFileName(TSCORE.selectedFiles[i]);
-            TSCORE.IO.copyFile(TSCORE.selectedFiles[i], newFilePath);
+            console.log(TSCORE.selectedFiles[i] + ' ' + newFilePath + ' ' + TSCORE.selectedFiles.length);
+            TSCORE.IO.copyFile(TSCORE.selectedFiles[i], newFilePath, true, function(src, dest) {
+              TSCORE.TagUtils.updateTagsOnIOAction("cp", src, dest);
+            });
           }
         });
         $('#selectDirectoryMoveCopyDialog').click(function(e) {

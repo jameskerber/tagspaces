@@ -2,7 +2,7 @@
  * Use of this source code is governed by a AGPL3 license that
  * can be found in the LICENSE file. */
 
-/* global define, fs, process, gui  */
+/* global define, fs, process, gui, trash  */
 /* undef: true, unused: true */
 
 define(function(require, exports, module) {
@@ -13,6 +13,7 @@ define(function(require, exports, module) {
 
   var TSCORE = require("tscore");
   var TSPOSTIO = require("tspostioapi");
+  console.log(trash);
   var fsWatcher;
   var win = gui.Window.get();
   /* var splashwin = gui.Window.open('splashscreen.html', {
@@ -282,7 +283,7 @@ define(function(require, exports, module) {
     });
   };
 
-  var copyFile = function(sourceFilePath, targetFilePath, silentMode) {
+  var copyFile = function(sourceFilePath, targetFilePath, silentMode, callback) {
     console.log("Copy file: " + sourceFilePath + " to " + targetFilePath);
 
     if (sourceFilePath.toLowerCase() === targetFilePath.toLowerCase()) {
@@ -312,20 +313,15 @@ define(function(require, exports, module) {
       TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
     });
     wr.on("close", function(ex) {
-      var oldMethod = TSCORE.Config.getLocation(sourceFilePath).tagMethod;
-      var newMethod = oldMethod;
-      if (TSCORE.Config.getLocation(targetFilePath) !== undefined) {
-        // File is being copied to another tagspaces directory.
-        newMethod = TSCORE.Config.getLocation(targetFilePath).tagMethod;
-      }
-      var tags = TSCORE.TagUtils.convertTags(targetFilePath, oldMethod, newMethod, sourceFilePath);
+      if (undefined !== callback)
+        callback(sourceFilePath, targetFilePath);
       if (!silentMode)
         TSPOSTIO.copyFile(sourceFilePath, targetFilePath);
     });
     rd.pipe(wr);
   };
 
-  var renameFile = function(filePath, newFilePath) {
+  var renameFile = function(filePath, newFilePath, silentMode, callback) {
     console.log("Renaming file: " + filePath + " to " + newFilePath);
 
     if (filePath === newFilePath) {
@@ -349,7 +345,10 @@ define(function(require, exports, module) {
         TSCORE.showAlertDialog($.i18n.t("ns.common:fileRenameFailedDiffPartition", { fileName:filePath }));
         return;
       }
-      TSPOSTIO.renameFile(filePath, newFilePath);
+      if (undefined !== callback)
+        callback(sourceFilePath, targetFilePath);
+      if (!silentMode)
+        TSPOSTIO.renameFile(filePath, newFilePath);
     });
   };
 
@@ -582,30 +581,52 @@ define(function(require, exports, module) {
     }
   };
 
-  var deleteElement = function(path, silentMode) {
+  var deleteElement = function(path, silentMode, isPermanent) {
     console.log("Deleting: " + path);
 
-    fs.unlink(path, function(error) {
-      if (error) {
-        console.log("Deleting file " + path + " failed " + error);
-        return;
-      }
-      if (!silentMode)
-        TSPOSTIO.deleteElement(path);
-    });
+    if (isPermanent) {
+      fs.unlink(path, function(error) {
+        if (error) {
+          console.log("Deleting file " + path + " failed " + error);
+          return;
+        }
+        if (!silentMode)
+          TSPOSTIO.deleteElement(path);
+      });
+    } else {
+      trash([path], function(error) {
+        if (error) {
+          console.log("Sending file " + path + " to trash failed " + error);
+          return;
+        }
+        if (!silentMode)
+          TSPOSTIO.deleteElement(path);
+      });
+    }
   };
 
-  var deleteDirectory = function(path) {
+  var deleteDirectory = function(path, isPermanent) {
     console.log("Deleting directory: " + path);
 
-    fs.rmdir(path, function(error) {
-      if (error) {
-        console.log("Deleting directory " + path + " failed " + error);
-        TSPOSTIO.deleteDirectoryFailed(path);
-        return;
-      }
-      TSPOSTIO.deleteDirectory(path);
-    });
+    if (isPermanent) {
+      fs.rmdir(path, function(error) {
+        if (error) {
+          console.log("Deleting directory " + path + " failed " + error);
+          TSPOSTIO.deleteDirectoryFailed(path);
+          return;
+        }
+        TSPOSTIO.deleteDirectory(path);
+      });
+    } else {
+      trash([path], function(error) {
+        if (error) {
+          console.log("Sending directory " + path + " to trash failed " + error);
+          TSPOSTIO.deleteDirectoryFailed(path);
+          return;
+        }
+        TSPOSTIO.deleteDirectory(path);
+      });
+    }
   };
 
   var checkAccessFileURLAllowed = function() {

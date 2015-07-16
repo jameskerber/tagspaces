@@ -35,10 +35,13 @@ define(function(require, exports, module) {
     }
   }
 
-  function extractFileNameWithoutExt(filePath) {
+  function extractFileNameWithoutExt(filePath, tagMethod) {
     var fileName = extractFileName(filePath);
     var indexOfDot = fileName.lastIndexOf('.');
-    if (TSCORE.Config.getLocation(filePath).tagMethod === "1") {
+    if (undefined === tagMethod)
+      tagMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+
+    if (tagMethod === "1") {
       if (indexOfDot > 0)
         return fileName.substring(0, indexOfDot);
       else
@@ -105,10 +108,12 @@ define(function(require, exports, module) {
     }
   }
 
-  function extractTitle(filePath) {
+  function extractTitle(filePath, tagMethod) {
     console.log('Extracting title from: ' + filePath);
-    var fileName = extractFileNameWithoutExt(filePath);
-    if (TSCORE.Config.getLocation(filePath).tagMethod === "2" || TSCORE.Config.getLocation(filePath).tagMethod === "1")
+    if (undefined === tagMethod)
+      tagMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+    var fileName = extractFileNameWithoutExt(filePath, tagMethod);
+    if (tagMethod === "2" || tagMethod === "1")
       return fileName;
     var beginTagContainer = fileName.indexOf(BEGIN_TAG_CONTAINER);
     var endTagContainer = fileName.lastIndexOf(END_TAG_CONTAINER);
@@ -319,13 +324,40 @@ define(function(require, exports, module) {
 
   // Use originalFilePath when copying/moving files.
   function convertTags(filePath, oldMethod, newMethod, originalFilePath) {
+    console.log('2');
     if (undefined === originalFilePath) {
       originalFilePath = filePath;
     }
     var oldTags = extractTags(originalFilePath, oldMethod);
     if (oldTags.length > 0) {
-      cleanFileFromTags(filePath, oldMethod);
-      writeTagsToFile(filePath, oldTags, newMethod, true);
+      var cleanedFilePath = cleanFileFromTags(filePath, oldMethod);
+      writeTagsToFile(cleanedFilePath, oldTags, newMethod, true);
+    }
+  }
+
+  function updateTagsOnIOAction(action, filePath, targetFilePath) {
+    console.log('filePath: ' + filePath + ' targetFilePath ' + targetFilePath);
+    var oldMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+    var newMethod = oldMethod;
+    if (undefined !== targetFilePath) {
+      if (TSCORE.Config.getLocation(targetFilePath) !== undefined) {
+      // File is being copied/moved to another tagspaces directory.
+      newMethod = TSCORE.Config.getLocation(targetFilePath).tagMethod;
+      }
+    }
+
+    if ("cp" === action) {
+      TSCORE.TagUtils.convertTags(targetFilePath, oldMethod, newMethod, filePath);
+    } else if ("mv" === action) {
+      if ("1" === oldMethod) {
+        TSCORE.IO.renameFile(filePath + TAG_FILE_EXTENSION, targetFilePath + TAG_FILE_EXTENSION, true, function () {
+          TSCORE.TagUtils.convertTags(targetFilePath, oldMethod, newMethod);
+        });
+      }
+    } else if ("rm" === action) {
+
+    } else {
+      console.log('Error: Invalid action argument specified');
     }
   }
 
@@ -486,26 +518,33 @@ define(function(require, exports, module) {
     }
     if (tagMethod === "2") {
       TSCORE.IO.clearDatabaseEntry(TSCORE.Config.getLocation(filePath).path + TAG_DATABASE_NAME, newTagFileContent);
+      return filePath;
 
     } else if (tagMethod === "1") {
-      TSCORE.IO.deleteElement(filePath + TAG_FILE_EXTENSION, true);
+      TSCORE.IO.deleteElement(filePath + TAG_FILE_EXTENSION, true, true);
+      return filePath;
 
     } else {
-      var fileTitle = extractTitle(filePath);
+      var fileTitle = extractTitle(filePath, tagMethod);
       var fileExt = extractFileExtension(filePath);
       var containingDirectoryPath = extractContainingDirectoryPath(filePath);
       if (fileExt.length > 0) {
         fileExt = '.' + fileExt;
       }
-      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt);
+      var newFilePath = containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt;
+      TSCORE.IO.renameFile(filePath, newFilePath);
+      return newFilePath;
     }
+
   }
 
   function cleanFilesFromTags(filePathArray) {
     console.log('Cleaning file from tags');
+    var cleanedFileNames = [];
     for (var i = 0; i < filePathArray.length; i++) {
-      cleanFileFromTags(filePathArray[i]);
+      cleanedFileNames.push(cleanFileFromTags(filePathArray[i]));
     }
+    return cleanedFileNames;
   }
 
   function addTag(filePathArray, tagArray) {
@@ -680,6 +719,7 @@ define(function(require, exports, module) {
   exports.extractParentDirectoryPath = extractParentDirectoryPath;
   exports.extractFileExtension = extractFileExtension;
   exports.extractTitle = extractTitle;
+  exports.updateTagsOnIOAction = updateTagsOnIOAction;
   exports.formatFileSize = formatFileSize;
   exports.formatDateTime = formatDateTime;
   exports.formatDateTime4Tag = formatDateTime4Tag;

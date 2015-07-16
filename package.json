@@ -23,7 +23,9 @@
     "file manager"
   ],
   "readmeFilename": "Readme.md",
-  "dependencies": {},
+  "dependencies": {
+    "trash": "^1.0.0"
+    },
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
