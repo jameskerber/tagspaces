@@ -147,7 +147,7 @@ define(function(require, exports, module) {
     TSCORE.showConfirmDialog($.i18n.t('ns.dialogs:fileDeleteTitleConfirm'), $.i18n.t('ns.dialogs:fileDeleteContentConfirm', {
       filePath: filePath
     }), function() {
-      TSCORE.IO.deleteElement(filePath);
+      TSCORE.TagUtils.deleteElement(filePath, false);
     });
   };
   var showTagEditDialog = function() {
@@ -224,7 +224,7 @@ define(function(require, exports, module) {
           var newFilePath;
           for (var i = 0; i < TSCORE.selectedFiles.length; i++) {
             newFilePath = $('#moveCopyDirectoryPath').val() + TSCORE.dirSeparator + TSCORE.TagUtils.extractFileName(TSCORE.selectedFiles[i]);
-            TSCORE.IO.renameFile(TSCORE.selectedFiles[i], newFilePath, true, true);
+            TSCORE.TagUtils.renameFile(TSCORE.selectedFiles[i], newFilePath, true);
           }
         });
         $('#copyFilesButton').click(function(e) {
@@ -384,7 +384,8 @@ define(function(require, exports, module) {
     $('#renameFileButton').click(function() {
       var initialFilePath = $('#renamedFileName').attr('filepath');
       var containingDir = TSCORE.TagUtils.extractContainingDirectoryPath(initialFilePath);
-      TSCORE.IO.renameFile(initialFilePath, containingDir + TSCORE.dirSeparator + $('#renamedFileName').val());
+      TSCORE.TagUtils.renameFile(initialFilePath, containingDir + TSCORE.dirSeparator + $('#renamedFileName').val(), true);
+
     });
     // Edit Tag Dialog
     $('#plainTagTypeButton').click(function(e) {

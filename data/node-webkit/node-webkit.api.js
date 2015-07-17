@@ -326,7 +326,7 @@ define(function(require, exports, module) {
     rd.pipe(wr);
   };
 
-  var renameFile = function(filePath, newFilePath, noPostIO, silentMode) {
+  var renameFile = function(filePath, newFilePath, noPostIO, silentMode, callback) {
     console.log("Renaming file: " + filePath + " to " + newFilePath);
 
     if (filePath === newFilePath) {
@@ -354,6 +354,8 @@ define(function(require, exports, module) {
           TSCORE.showAlertDialog($.i18n.t("ns.common:fileRenameFailedDiffPartition", { fileName:filePath }));
         return;
       }
+      if (undefined !== callback)
+        callback(error);
       if (!noPostIO)
         TSPOSTIO.renameFile(filePath, newFilePath);
     });
