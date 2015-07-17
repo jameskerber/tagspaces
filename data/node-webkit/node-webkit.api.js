@@ -283,71 +283,78 @@ define(function(require, exports, module) {
     });
   };
 
-  var copyFile = function(sourceFilePath, targetFilePath, silentMode, callback) {
+  var copyFile = function(sourceFilePath, targetFilePath, noPostIO, silentMode, callback) {
     console.log("Copy file: " + sourceFilePath + " to " + targetFilePath);
 
     if (sourceFilePath.toLowerCase() === targetFilePath.toLowerCase()) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileTheSame"), $.i18n.t("ns.common:fileNotCopyied"));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileTheSame"), $.i18n.t("ns.common:fileNotCopyied"));
       return false;
     }
     if (fs.lstatSync(sourceFilePath).isDirectory()) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileIsDirectory", { fileName:sourceFilePath }));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileIsDirectory", { fileName:sourceFilePath }));
       return false;
     }
     if (fs.existsSync(targetFilePath)) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileExists", { fileName:targetFilePath }),  $.i18n.t("ns.common:fileRenameFailed"));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileExists", { fileName:targetFilePath }),  $.i18n.t("ns.common:fileNotCopyied"));
       return false;
     }
 
     var rd = fs.createReadStream(sourceFilePath);
     rd.on("error", function(err) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
     });
     var wr = fs.createWriteStream(targetFilePath);
     wr.on("error", function(err) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileCopyFailed", { fileName:sourceFilePath }));
     });
     wr.on("close", function(ex) {
       if (undefined !== callback)
-        callback(sourceFilePath, targetFilePath);
-      if (!silentMode)
+        callback(ex);
+      if (!noPostIO)
         TSPOSTIO.copyFile(sourceFilePath, targetFilePath);
     });
     rd.pipe(wr);
   };
 
-  var renameFile = function(filePath, newFilePath, silentMode, callback) {
+  var renameFile = function(filePath, newFilePath, noPostIO, silentMode) {
     console.log("Renaming file: " + filePath + " to " + newFilePath);
 
     if (filePath === newFilePath) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileTheSame"), $.i18n.t("ns.common:fileNotMoved"));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileTheSame"), $.i18n.t("ns.common:fileNotMoved"));
       return false;
     }
     if (fs.lstatSync(filePath).isDirectory()) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileIsDirectory", { fileName:filePath }));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileIsDirectory", { fileName:filePath }));
       return false;
     }
     if (fs.existsSync(newFilePath)) {
       TSCORE.hideWaitingDialog();
-      TSCORE.showAlertDialog($.i18n.t("ns.common:fileExists", { fileName:newFilePath }), $.i18n.t("ns.common:fileRenameFailed"));
+      if (!silentMode)
+        TSCORE.showAlertDialog($.i18n.t("ns.common:fileExists", { fileName:newFilePath }), $.i18n.t("ns.common:fileRenameFailed"));
       return false;
     }
     fs.rename(filePath, newFilePath, function(error) {
       if (error) {
         TSCORE.hideWaitingDialog();
-        TSCORE.showAlertDialog($.i18n.t("ns.common:fileRenameFailedDiffPartition", { fileName:filePath }));
+        if (!silentMode)
+          TSCORE.showAlertDialog($.i18n.t("ns.common:fileRenameFailedDiffPartition", { fileName:filePath }));
         return;
       }
-      if (undefined !== callback)
-        callback(sourceFilePath, targetFilePath);
-      if (!silentMode)
+      if (!noPostIO)
         TSPOSTIO.renameFile(filePath, newFilePath);
     });
   };
@@ -447,7 +454,7 @@ define(function(require, exports, module) {
       });
   };    */
 
-  var saveTextFile = function(filePath, content, overWrite, silentMode) {
+  var saveTextFile = function(filePath, content, overWrite, noPostIO) {
     console.log("Saving file: " + filePath);
 
     /** TODO check if fileExist by saving needed
@@ -476,7 +483,7 @@ define(function(require, exports, module) {
         console.log("Save to file " + filePath + " failed " + error);
         return;
       }
-      if (silentMode !== true) {
+      if (noPostIO !== true) {
         TSPOSTIO.saveTextFile(filePath, isNewFile);
       }
     });

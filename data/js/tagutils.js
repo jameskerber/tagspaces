@@ -64,6 +64,28 @@ define(function(require, exports, module) {
     }
   }
 
+  function extractFileNameWithoutTags(filePath, tagMethod) {
+    if (undefined === tagMethod) {
+      tagMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+    }
+    if (tagMethod === "2") {
+      return filePath;
+
+    } else if (tagMethod === "1") {
+      return filePath;
+
+    } else {
+      var fileTitle = extractTitle(filePath, tagMethod);
+      var fileExt = extractFileExtension(filePath);
+      var containingDirectoryPath = extractContainingDirectoryPath(filePath);
+      if (fileExt.length > 0) {
+        fileExt = '.' + fileExt;
+      }
+      var newFilePath = containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt;
+        return newFilePath;
+    }
+  }
+
   function stringEndsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
   }
@@ -324,41 +346,47 @@ define(function(require, exports, module) {
 
   // Use originalFilePath when copying/moving files.
   function convertTags(filePath, oldMethod, newMethod, originalFilePath) {
-    console.log('2');
     if (undefined === originalFilePath) {
       originalFilePath = filePath;
     }
     var oldTags = extractTags(originalFilePath, oldMethod);
     if (oldTags.length > 0) {
       var cleanedFilePath = cleanFileFromTags(filePath, oldMethod);
-      writeTagsToFile(cleanedFilePath, oldTags, newMethod, true);
+      if (cleanedFilePath)
+        writeTagsToFile(cleanedFilePath, oldTags, newMethod, true);
+      else
+        return false;
     }
+    return true;
   }
 
-  function updateTagsOnIOAction(action, filePath, targetFilePath) {
-    console.log('filePath: ' + filePath + ' targetFilePath ' + targetFilePath);
-    var oldMethod = TSCORE.Config.getLocation(filePath).tagMethod;
-    var newMethod = oldMethod;
+  function copyFile(sourceFilePath, targetFilePath, withTags) {
+    var oldMethod = TSCORE.Config.getLocation(sourceFilePath).tagMethod;
+    var newMethod = "1";  // TODO: Make this default export tag method available in settings.
     if (undefined !== targetFilePath) {
       if (TSCORE.Config.getLocation(targetFilePath) !== undefined) {
-      // File is being copied/moved to another tagspaces directory.
-      newMethod = TSCORE.Config.getLocation(targetFilePath).tagMethod;
+        // File is being copied/moved to another tagspaces directory.
+        newMethod = TSCORE.Config.getLocation(targetFilePath).tagMethod;
       }
     }
 
-    if ("cp" === action) {
-      TSCORE.TagUtils.convertTags(targetFilePath, oldMethod, newMethod, filePath);
-    } else if ("mv" === action) {
-      if ("1" === oldMethod) {
-        TSCORE.IO.renameFile(filePath + TAG_FILE_EXTENSION, targetFilePath + TAG_FILE_EXTENSION, true, function () {
-          TSCORE.TagUtils.convertTags(targetFilePath, oldMethod, newMethod);
-        });
+    var cleanedTargetFilePath = extractFileNameWithoutTags(targetFilePath, oldMethod);
+    var tags = extractTags(sourceFilePath);
+    cleanedTargetFilePath = generateFileName(cleanedTargetFilePath, tags, newMethod);
+    TSCORE.IO.copyFile(sourceFilePath, cleanedTargetFilePath, true, false, function(err) {
+      if (!err) {
+        if (withTags && (tags.length > 0) ) {
+          if (false === writeTagsToFile(cleanedTargetFilePath, tags, newMethod, true)) {
+          //  TSCORE.showAlertDialog("Tags were unable to be copied.", $.i18n.t("ns.common:fileNotCopyied"));
+          }
+        }
       }
-    } else if ("rm" === action) {
+      TSCORE.hideWaitingDialog();
+    });
+  }
 
-    } else {
-      console.log('Error: Invalid action argument specified');
-    }
+  function renameFile(sourceFilePath, targetFilePath, withTags) {
+
   }
 
   function suggestTags(filePath) {
@@ -392,7 +420,10 @@ define(function(require, exports, module) {
   }
 
   // Internal
-  function generateFileName(fileName, tags) {
+  function generateFileName(fileName, tags, tagMethod) {
+    if ( ("2" === tagMethod) || ("1" === tagMethod) ) {
+      return fileName;
+    }
     var tagsString = '';
     // Creating the string will all the tags by more that 0 tags
     if (tags.length > 0) {
@@ -448,9 +479,13 @@ define(function(require, exports, module) {
 
   function writeTagsToFile(filePath, tags, tagMethod, isConversion) {
     console.log('Add the tags to: ' + filePath);
-    if (undefined === tagMethod) {
-      tagMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+    if (undefined !== filePath) {
+      if (TSCORE.Config.getLocation(filePath) !== undefined) {
+        // File is being copied/moved to another tagspaces directory.
+        tagMethod = TSCORE.Config.getLocation(filePath).tagMethod;
+      }
     }
+    var noError = true;
     var fileName = extractFileName(filePath);
     var containingDirectoryPath = extractContainingDirectoryPath(filePath);
     // No tags for destination file as it was cleaned during conversion.
@@ -478,10 +513,12 @@ define(function(require, exports, module) {
 
     } else {
       var newFileName = generateFileName(fileName, extractedTags);
-      TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName);
+      noError = TSCORE.IO.renameFile(filePath, containingDirectoryPath + TSCORE.dirSeparator + newFileName, true, true);
     }
     if (!isConversion)
       collectRecentTags(tags);
+
+    return noError;
   }
 
   function removeTagsFromFile(filePath, tags) {
@@ -532,10 +569,11 @@ define(function(require, exports, module) {
         fileExt = '.' + fileExt;
       }
       var newFilePath = containingDirectoryPath + TSCORE.dirSeparator + fileTitle + fileExt;
-      TSCORE.IO.renameFile(filePath, newFilePath);
-      return newFilePath;
+      if (TSCORE.IO.renameFile(filePath, newFilePath))
+        return newFilePath;
+      else
+        return;
     }
-
   }
 
   function cleanFilesFromTags(filePathArray) {
@@ -713,13 +751,13 @@ define(function(require, exports, module) {
   exports.tagDatabaseName = TAG_DATABASE_NAME;
   exports.extractFileName = extractFileName;
   exports.extractFileNameWithoutExt = extractFileNameWithoutExt;
+  exports.extractFileNameWithoutTags = extractFileNameWithoutTags;
   exports.extractContainingDirectoryPath = extractContainingDirectoryPath;
   exports.extractContainingDirectoryName = extractContainingDirectoryName;
   exports.extractDirectoryName = extractDirectoryName;
   exports.extractParentDirectoryPath = extractParentDirectoryPath;
   exports.extractFileExtension = extractFileExtension;
   exports.extractTitle = extractTitle;
-  exports.updateTagsOnIOAction = updateTagsOnIOAction;
   exports.formatFileSize = formatFileSize;
   exports.formatDateTime = formatDateTime;
   exports.formatDateTime4Tag = formatDateTime4Tag;
@@ -728,6 +766,7 @@ define(function(require, exports, module) {
   exports.extractTags = extractTags;
   exports.suggestTags = suggestTags;
   exports.writeTagsToFile = writeTagsToFile;
+  exports.copyFile = copyFile;
   exports.moveTagLocation = moveTagLocation;
   exports.renameTag = renameTag;
   exports.removeTag = removeTag;
